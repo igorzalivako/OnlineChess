@@ -1,0 +1,71 @@
+﻿namespace ChessEngine
+{
+    public class OpeningBook
+    {
+        private List<List<Move>> _moves = new List<List<Move>>();
+
+        public OpeningBook(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Opening book not found", path);
+
+            foreach (var line in File.ReadLines(path))
+            {
+                var gameMoves = new List<Move>();
+                var position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+
+                foreach (var sanMove in line.Split(' ').Where(m => !string.IsNullOrWhiteSpace(m)))
+                {
+                    var (from, to) = ParseSANMove(sanMove);
+                    var legalMoves = LegalMovesGenerator.Generate(position, position.ActiveColor, false);
+
+                    var foundMove = legalMoves.FirstOrDefault((Move m) => m.From == from && m.To == to);
+                    if (foundMove is null)
+                        throw new InvalidDataException($"Некорректный ход {sanMove} в дебютной базе");
+                    gameMoves.Add(foundMove.Value);
+                    position.MakeMove(foundMove.Value);
+                }
+                _moves.Add(gameMoves);
+            }
+        }
+
+        public (Move Move, int Count) TryFindMove(Position position)
+        {
+            var candidateMoves = new HashSet<Move>();
+
+            foreach (var game in _moves)
+            {
+                var testPosition = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+
+                for (int i = 0; i < game.Count; i++)
+                {
+                    if (testPosition == position)
+                    {
+                        if (i < game.Count - 1 && !candidateMoves.Contains(game[i]))
+                            candidateMoves.Add(game[i]);
+                    }
+
+                    if (i < game.Count)
+                        testPosition.MakeMove(game[i]);
+                }
+            }
+
+            return candidateMoves.Count == 0
+                ? (default, 0)
+                : (candidateMoves.ElementAt(new Random().Next(candidateMoves.Count)), candidateMoves.Count);
+        }
+
+        private (byte from, byte to) ParseSANMove(string san)
+        {
+            // Пример: "e2e4" -> (12, 28)
+            if (san.Length < 4) throw new FormatException("Invalid SAN move");
+
+            int fromFile = san[0] - 'a';
+            int fromRank = san[1] - '1';
+            int toFile = san[2] - 'a';
+            int toRank = san[3] - '1';
+
+            return ((byte)(fromRank * 8 + fromFile), (byte)(toRank * 8 + toFile));
+        }
+    }
+}
