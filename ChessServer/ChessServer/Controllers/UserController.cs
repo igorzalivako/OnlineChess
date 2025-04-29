@@ -47,7 +47,7 @@ public class UsersController : ControllerBase
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             return Unauthorized();
 
-        var token = GenerateJwtToken(user); // Реализуйте генерацию JWT
+        var token = GenerateJwtToken(user); 
         return Ok(new { token });
     }
     private string GenerateJwtToken(User user)
@@ -62,10 +62,10 @@ public class UsersController : ControllerBase
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[] {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-    };
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        };
 
         var token = new JwtSecurityToken(
             issuer: issuer,

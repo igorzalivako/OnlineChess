@@ -1,5 +1,6 @@
 ﻿using ChessEngine;
 using ChessServer.Data;
+using ChessServer.Utilities;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.RegularExpressions;
 
@@ -20,16 +21,18 @@ public class GameHub : Hub
         if (game == null) return;
 
         await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-        await Clients.Caller.SendAsync("GameState", game.CurrentFEN);
+        await Clients.Caller.SendAsync("GameState", game.Position);
     }
 
-    public async Task MakeMove(string gameId, string move)
+    public async Task MakeMove(string gameId, string moveJson)
     {
         var game = await _db.Games.FindAsync(gameId);
         if (game == null || game.Status != ChessServer.Models.GameStatus.Active) return;
 
+        Move move = MoveSerializer.DeserializeFromJson(moveJson);
+
         // Валидация хода через движок
-        _engine.LoadPosition(game.CurrentFEN);
+        _engine.LoadPosition(game.Position);
         if (!_engine.IsMoveValid(move))
         {
             await Clients.Caller.SendAsync("InvalidMove", move);
@@ -38,8 +41,8 @@ public class GameHub : Hub
 
         // Обновление состояния
         _engine.ApplyMove(move);
-        game.CurrentFEN = _engine.GetFEN();
-        game.Moves.Add(move);
+        game.Position = _engine.Position;
+        game.Moves.Add(moveJson);
         await _db.SaveChangesAsync();
 
         // Рассылка хода
