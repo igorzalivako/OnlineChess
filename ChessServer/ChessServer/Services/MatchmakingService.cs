@@ -48,7 +48,7 @@ public class MatchmakingService
         {
             PlayerWhiteId = player1,
             PlayerBlackId = player2,
-            CurrentFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+            Position = new ChessEngine.Position("rnbqkbn/rpppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
         };
 
         _db.Games.Add(game);

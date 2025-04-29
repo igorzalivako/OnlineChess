@@ -8,25 +8,23 @@ namespace ChessEngine
 {
     public class ChessGame
     {
-        public void ApplyMove(string move)
+        public Position Position { get; set; }
+        public void ApplyMove(Move move)
         {
-            throw new NotImplementedException();
+            Position.MakeMove(move);
         }
 
-        public string GetFEN()
+        public bool IsMoveValid(Move move)
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsMoveValid(string move)
-        {
-            throw new NotImplementedException();
+            MoveList availableMoves = LegalMovesGenerator.Generate(Position, move.AttackerSide, false);
+            // lifted operator
+            return availableMoves.FirstOrDefault((Move m) => m == move) != null;
         }
 
         // Реализовать логику движка
-        public void LoadPosition(string currentFEN)
+        public void LoadPosition(Position position)
         {
-            throw new NotImplementedException();
+            Position = position;
         }
     }
 }

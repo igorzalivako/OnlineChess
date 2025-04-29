@@ -12,20 +12,20 @@
         private const byte KING_E8 = 60;
         private const byte ROOK_H8 = 63;
 
-        public Pieces Pieces { get; private set; }
-        public byte EnPassant { get; private set; }
-        public bool WhiteLongCastling { get; private set; }
-        public bool WhiteShortCastling { get; private set; }
-        public bool BlackLongCastling { get; private set; }
-        public bool BlackShortCastling { get; private set; }
-        public bool WhiteCastlingHappened { get; private set; }
-        public bool BlackCastlingHappened { get; private set; }
-        public float MoveCounter { get; private set; }
-        public ZobristHash Hash { get; private set; }
+        public Pieces Pieces { get; set; }
+        public byte EnPassant { get; set; }
+        public bool WhiteLongCastling { get; set; }
+        public bool WhiteShortCastling { get; set; }
+        public bool BlackLongCastling { get; set; }
+        public bool BlackShortCastling { get; set; }
+        public bool WhiteCastlingHappened { get; set; }
+        public bool BlackCastlingHappened { get; set; }
+        public float MoveCounter { get; set; }
+        public ZobristHash Hash { get; set; }
         public PieceColor ActiveColor { get => GetActiveColor(); }
         public CastlingRights CastlingAvailability { get => GetCastlingAvailability(); }
         public RepetitionHistory RepetitionHistory { get; } = new RepetitionHistory();
-        public int FiftyMovesCounter { get; private set; }
+        public int FiftyMovesCounter { get; set; }
 
         private CastlingRights GetCastlingAvailability()
         {
