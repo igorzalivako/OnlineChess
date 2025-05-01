@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ChessClient.MainPage"
+             xmlns:viewmodels="clr-namespace:ChessClient.ViewModels"
+             x:DataType="viewmodels:MainViewModel"
+             Title="Шахматы Online">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+
+            <!-- Заголовок -->
+            <Label Text="Шахматы Online" 
+                   FontSize="Title" 
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Кнопка входа -->
+            <Button Text="Войти" 
+                    Command="{Binding ShowLoginCommand}"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    HeightRequest="50"/>
+
+            <!-- Кнопка регистрации -->
+            <Button Text="Зарегистрироваться" 
+                    Command="{Binding ShowRegisterCommand}"
+                    BackgroundColor="#2b0b98"
+                    TextColor="White"
+                    HeightRequest="50" />
+
+            <!-- Альтернативный вариант с горизонтальным расположением -->
+            <!--
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Button Text="Войти" ... />
+                <Button Text="Регистрация" ... />
+            </HorizontalStackLayout>
+            -->
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
