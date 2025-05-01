@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Добавьте в начало AuthPage.xaml -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ChessClient.Views.AuthPage"
+             xmlns:viewmodels="clr-namespace:ChessClient.ViewModels"
+             xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
+             x:DataType="viewmodels:AuthViewModel"
+             Title="Вход">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- BoolToColorConverter -->
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+
+            <!-- BoolToStringConverter -->
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+
+            <!-- StringIsNotNullOrEmptyConverter -->
+            <converters:StringIsNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter"/>
+
+            <!-- InverseBoolConverter -->
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+
+            <!-- BoolToCommandConverter -->
+            <converters:BoolToCommandConverter x:Key="BoolToCommandConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="15">
+            <!-- Switch between Login/Register -->
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="20">
+                <Button Text="Login" 
+                        Command="{Binding ShowLoginCommand}"
+                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Transparent;#006400'}" 
+                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Black;White'}" />
+
+                <Button Text="Register" 
+                        Command="{Binding ShowRegisterCommand}"
+                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#006400;Transparent'}" 
+                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White;Black'}" />
+            </StackLayout>
+
+            <!-- Auth Form -->
+            <Frame Padding="15" CornerRadius="10" HasShadow="True">
+                <StackLayout Spacing="15">
+                    <Label Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Register;Login'}" 
+                           FontSize="Title" HorizontalOptions="Center" />
+
+                    <!-- Username -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Username" FontAttributes="Bold" />
+                        <Entry Text="{Binding Username}" Placeholder="Enter username" />
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Password" FontAttributes="Bold" />
+                        <Entry Text="{Binding Password}" Placeholder="Enter password" IsPassword="True" />
+                    </VerticalStackLayout>
+
+                    <!-- Error Message -->
+                    <Label Text="{Binding ErrorMessage}" 
+                           TextColor="Red" 
+                           IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}" />
+
+                    <!-- Submit Button -->
+                    <Button Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Register;Login'}" 
+                            Command="{Binding IsRegisterMode, Converter={StaticResource BoolToCommandConverter}, ConverterParameter='RegisterCommand;LoginCommand'}" 
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                            BackgroundColor="#512BD4" TextColor="White" />
+
+                    <!-- Loading Indicator -->
+                    <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

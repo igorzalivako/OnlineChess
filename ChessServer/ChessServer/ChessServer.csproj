@@ -27,6 +27,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChessEngine\ChessEngine.csproj" />
+    <ProjectReference Include="..\ChessLibrary\ChessLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\DTO\" />
   </ItemGroup>
 
 </Project>

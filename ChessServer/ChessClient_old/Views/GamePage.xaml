@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Views/GamePage.xaml -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:vm="clr-namespace:ChessClient.ViewModels"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ChessClient.Views.GamePage"
+             Title="Game">
+
+    <Grid>
+        <!-- Шахматная доска -->
+        <Grid x:Name="ChessBoard"
+              HorizontalOptions="Center"
+              VerticalOptions="Center"
+              RowDefinitions="*,*,*,*,*,*,*,*"
+              ColumnDefinitions="*,*,*,*,*,*,*,*"
+              BackgroundColor="LightGray"
+              Padding="5">
+
+            <!-- Клетки генерируются в коде -->
+        </Grid>
+
+        <!-- Таймеры и кнопки -->
+        <VerticalStackLayout Spacing="10" Padding="20">
+            <Label Text="{Binding WhiteTime}" 
+                   FontSize="Large"
+                   HorizontalOptions="Start"/>
+
+            <Button Text="Сдаться" 
+                    Command="{Binding ResignCommand}"
+                    BackgroundColor="Red"
+                    TextColor="White"/>
+
+            <Label Text="{Binding BlackTime}" 
+                   FontSize="Large"
+                   HorizontalOptions="End"/>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
