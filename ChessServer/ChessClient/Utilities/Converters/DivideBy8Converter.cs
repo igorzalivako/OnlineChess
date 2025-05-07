@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 
 namespace ChessClient.Utilities.Converters
 {
-    public class BoolToColorConverter : IValueConverter
+    public class DivideBy8Converter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue && parameter is string parameters)
+            if (value is double size)
             {
-                var parts = parameters.Split(';');
-                var colorString = boolValue ? parts[0] : parts[1];
-                if (colorString == "Transparent")
-                    return Colors.Transparent;
-                return Color.FromArgb(colorString);
+                return size / 8;
             }
-            return Colors.Transparent;
+            return 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

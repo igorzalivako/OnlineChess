@@ -1,12 +1,15 @@
-﻿using ChessServer.Data;
+﻿using ChessLibrary.Models.DTO;
+using ChessServer.Data;
 using ChessServer.Models;
 using ChessServer.Models.DTO;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 [ApiController]
 [Route("api/users")]
@@ -24,8 +27,13 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto dto)
     {
+        AuthResponse authResponse;
+
         if (await _db.Users.AnyAsync(u => u.Username == dto.Username))
-            return BadRequest("Username already exists");
+        {
+            authResponse = new AuthResponse() { Token = "", Success = false, Error = "Пользователь уже существует" };
+            return BadRequest(authResponse);
+        }
 
         var user = new User
         {
@@ -37,18 +45,25 @@ public class UsersController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         var token = GenerateJwtToken(user);
-        return Ok(new { Token = token });
+        authResponse = new AuthResponse() { Token = token, Success = true, Error = "" };
+        return Ok(authResponse);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto dto)
     {
+        LoginResponse authResponse; 
+        
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-            return Unauthorized();
+        {
+            authResponse = new LoginResponse() { Token = "", Success = false, Error = "Неверный пароль" };
+            return Unauthorized(new { authResponse });
+        }
 
-        var token = GenerateJwtToken(user); 
-        return Ok(new { token });
+        var token = GenerateJwtToken(user);
+        authResponse = new LoginResponse() { Token = token, Success = true, Error = "", Username = user.Username, Rating = user.Rating };
+        return Ok(authResponse);
     }
     private string GenerateJwtToken(User user)
     {

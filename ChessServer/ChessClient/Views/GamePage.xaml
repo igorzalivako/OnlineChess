@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ChessClient.ViewModels"
+             xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
+             x:Class="ChessClient.Views.GamePage"
+             Title="Chess Board">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:DivideBy8Converter x:Key="DivideBy8Converter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid x:Name="ChessBoardContainer">
+        <!-- Шахматная доска -->
+        <CollectionView x:Name="ChessBoardGrid"
+                        ItemsSource="{Binding Squares}"
+                        ItemsLayout="8, Grid, Vertical">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <BoxView Color="{Binding Color}">
+                        <BoxView.WidthRequest>
+                            <MultiBinding Converter="{StaticResource DivideBy8Converter}">
+                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Width"/>
+                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Height"/>
+                            </MultiBinding>
+                        </BoxView.WidthRequest>
+                        <BoxView.HeightRequest>
+                            <MultiBinding Converter="{StaticResource DivideBy8Converter}">
+                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Width"/>
+                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Height"/>
+                            </MultiBinding>
+                        </BoxView.HeightRequest>
+                    </BoxView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Буквы (a-h) внизу -->
+        <HorizontalStackLayout AbsoluteLayout.LayoutBounds="0.1,0.8,0.8,0.1"
+                                AbsoluteLayout.LayoutFlags="All"
+                                HorizontalOptions="Center"
+                                Spacing="0">
+            <Label Text="a" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="b" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="c" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="d" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="e" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="f" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="g" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+            <Label Text="h" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
+        </HorizontalStackLayout>
+
+            <!-- Цифры (1-8) слева -->
+        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0,0,0.1,0.8"
+                               AbsoluteLayout.LayoutFlags="All"
+                               VerticalOptions="Center"
+                               Spacing="0">
+            <Label Text="8" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="7" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="6" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="5" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="4" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="3" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="2" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+            <Label Text="1" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

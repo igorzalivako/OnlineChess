@@ -1,6 +1,7 @@
 ﻿using ChessClient.Services;
 using ChessServer.Models.DTO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using System;
@@ -11,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace ChessClient.ViewModels
 {
-    public class AuthViewModel : BaseViewModel
+    [QueryProperty(nameof(Mode), "mode")]
+    public partial class AuthViewModel : BaseViewModel
     {
         private readonly IAuthService _authService;
 
@@ -19,26 +21,13 @@ namespace ChessClient.ViewModels
         private string _password;
         private string _errorMessage;
         private bool _isLoading;
-
-
+        private string _repeatedPassword;
 
         public AuthViewModel(IAuthService authService)
         {
             _authService = authService;
             LoginCommand = new Command(async () => await LoginAsync());
             RegisterCommand = new Command(async () => await RegisterAsync());
-            Shell.Current.Navigated += OnNavigated;
-        }
-
-        private void OnNavigated(object sender, ShellNavigatedEventArgs e)
-        {
-            if (e.Current?.Location.ToString().Contains("auth") == true)
-            {
-                var mode = Shell.Current.CurrentState.Location.OriginalString
-                    .Split('=').LastOrDefault();
-
-                IsRegisterMode = mode == "register";
-            }
         }
 
         public string Username
@@ -72,10 +61,39 @@ namespace ChessClient.ViewModels
             set => SetProperty(ref _isRegisterMode, value);
         }
 
+        public string RepeatedPassword
+        {
+            get => _repeatedPassword;
+            set => SetProperty(ref _repeatedPassword, value); 
+        }
+
         public Command LoginCommand { get; }
         public Command RegisterCommand { get; }
-        public Command ShowLoginCommand { get; }
-        public Command ShowRegisterCommand { get; }
+
+        private string _mode;
+        public string Mode
+        {
+            get => _mode;
+            set
+            {
+                _mode = value;
+                IsRegisterMode = value == "register"; // Обновляем состояние
+            }
+        }
+
+        [RelayCommand]        
+        private async Task ShowLogin()
+        {
+            ClearSession();
+            await Shell.Current.GoToAsync("///AuthPage?mode=login");
+        }
+
+        [RelayCommand]
+        private async Task ShowRegister()
+        {
+            ClearSession();
+            await Shell.Current.GoToAsync("///AuthPage?mode=register");
+        }
 
         private async Task LoginAsync()
         {
@@ -105,7 +123,7 @@ namespace ChessClient.ViewModels
                 {
                     // Сохраняем токен и переходим на главный экран
                     await SecureStorage.SetAsync("jwt_token", result.Token);
-                    await Shell.Current.GoToAsync("//main");
+                    await Shell.Current.GoToAsync($"///MainPage?username={Username}&rating={result.Rating}");
                 }
                 else
                 {
@@ -125,45 +143,60 @@ namespace ChessClient.ViewModels
         private async Task RegisterAsync()
         {
             if (IsLoading) return;
+            
+            IsLoading = true;
 
             ErrorMessage = string.Empty;
 
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                ErrorMessage = "Username and password are required";
+                ErrorMessage = "Необходимо ввести пароль и логин";
                 return;
             }
-
-            try
+            else if (string.IsNullOrWhiteSpace(RepeatedPassword) || RepeatedPassword != Password)
             {
-                IsLoading = true;
-
-                var registerDto = new UserRegisterDto
+                ErrorMessage = "Пароли не совпадают";
+            }
+            else
+            {
+                try
                 {
-                    Username = Username,
-                    Password = Password
-                };
+                    var registerDto = new UserRegisterDto
+                    {
+                        Username = Username,
+                        Password = Password
+                    };
 
-                var result = await _authService.RegisterAsync(registerDto);
+                    var result = await _authService.RegisterAsync(registerDto);
 
-                if (result.Success)
-                {
-                    // После успешной регистрации автоматически входим
-                    await LoginAsync();
+                    if (result.Success)
+                    {
+                        // После успешной регистрации автоматически входим
+                        await LoginAsync();
+                    }
+                    else
+                    {
+                        ErrorMessage = result.Error ?? "Ошибка регистрации";
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ErrorMessage = result.Error ?? "Registration failed";
+                    ErrorMessage = $"Произошла ошибка: {ex.Message}";
+                }
+                finally
+                {
+                    IsLoading = false;
                 }
             }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"An error occurred: {ex.Message}";
-            }
-            finally
-            {
-                IsLoading = false;
-            }
+            IsLoading = false;
+        }
+
+        private void ClearSession()
+        {
+            Username = "";
+            Password = "";
+            RepeatedPassword = "";
+            ErrorMessage = "";
         }
     }
 }

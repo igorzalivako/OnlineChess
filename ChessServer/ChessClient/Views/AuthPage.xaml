@@ -21,53 +21,71 @@
             <!-- InverseBoolConverter -->
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
 
-            <!-- BoolToCommandConverter -->
             <converters:BoolToCommandConverter x:Key="BoolToCommandConverter"/>
+
         </ResourceDictionary>
     </ContentPage.Resources>
     <ScrollView>
         <StackLayout Padding="20" Spacing="15">
             <!-- Switch between Login/Register -->
             <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="20">
-                <Button Text="Login" 
+                <Button Text="Вход" 
                         Command="{Binding ShowLoginCommand}"
-                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Transparent;#006400'}" 
-                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Black;White'}" />
+                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Transparent;#512BD4'}" 
+                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#000000;#FFFFFF'}" />
 
-                <Button Text="Register" 
+                <Button Text="Регистрация" 
                         Command="{Binding ShowRegisterCommand}"
-                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#006400;Transparent'}" 
-                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White;Black'}" />
+                        BackgroundColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#512BD4;Transparent'}" 
+                        TextColor="{Binding IsRegisterMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF;#000000'}" />
             </StackLayout>
 
             <!-- Auth Form -->
             <Frame Padding="15" CornerRadius="10" HasShadow="True">
                 <StackLayout Spacing="15">
-                    <Label Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Register;Login'}" 
+                    <Label Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Регистрация;Вход'}" 
                            FontSize="Title" HorizontalOptions="Center" />
 
                     <!-- Username -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Username" FontAttributes="Bold" />
-                        <Entry Text="{Binding Username}" Placeholder="Enter username" />
+                        <Label Text="Логин" FontAttributes="Bold" />
+                        <Entry Text="{Binding Username}" Placeholder="Введите логин" />
                     </VerticalStackLayout>
 
                     <!-- Password -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Password" FontAttributes="Bold" />
-                        <Entry Text="{Binding Password}" Placeholder="Enter password" IsPassword="True" />
+                        <Label Text="Пароль" FontAttributes="Bold" />
+                        <Entry Text="{Binding Password}" Placeholder="Введите пароль" IsPassword="True" />
                     </VerticalStackLayout>
 
+                    <!-- Repeat password-->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Повторите пароль" FontAttributes="Bold" />
+                        <Entry Text="{Binding RepeatedPassword}" 
+                               Placeholder="Повторите пароль" 
+                               IsPassword="True"
+                               IsVisible="{Binding IsRegisterMode}"/>
+                    </VerticalStackLayout>
+                    
                     <!-- Error Message -->
                     <Label Text="{Binding ErrorMessage}" 
                            TextColor="Red" 
                            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringIsNotNullOrEmptyConverter}}" />
 
                     <!-- Submit Button -->
-                    <Button Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Register;Login'}" 
-                            Command="{Binding IsRegisterMode, Converter={StaticResource BoolToCommandConverter}, ConverterParameter='RegisterCommand;LoginCommand'}" 
+                    <Button Text="{Binding IsRegisterMode, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Зарегистрироваться;Войти'}" 
                             IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
-                            BackgroundColor="#512BD4" TextColor="White" />
+                            BackgroundColor="#512BD4" TextColor="White" 
+                            Command="{Binding LoginCommand}">
+                        <Button.Triggers>
+                            <DataTrigger 
+                                TargetType="Button"
+                                Binding="{Binding IsRegisterMode}"
+                                Value="True">   
+                                <Setter Property="Command" Value="{Binding RegisterCommand}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
 
                     <!-- Loading Indicator -->
                     <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />

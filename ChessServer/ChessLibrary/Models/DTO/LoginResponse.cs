@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChessClient.Models
+namespace ChessLibrary.Models.DTO
 {
-    public class AuthResponse
+    public class LoginResponse
     {
         public string Token { get; set; }
-        public string Username { get; set; }
         public bool Success { get; set; }
         public string Error { get; set; }
+        public string Username { get; set; }
+        public int Rating { get; set; }
     }
 }
