@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 
 namespace ChessClient.Utilities.Converters
 {
-    public class BoolToColorConverter : IValueConverter
+    public class RatingToBracketsConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue && parameter is string parameters)
+            if (value is string stringValue)
             {
-                var parts = parameters.Split(';');
-                var colorString = boolValue ? parts[0] : parts[1];
-                if (colorString == "Transparent")
-                    return Colors.Transparent;
-                return Color.FromArgb(colorString);
+                return "(" + stringValue + ")";
             }
-            return Colors.Transparent;
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

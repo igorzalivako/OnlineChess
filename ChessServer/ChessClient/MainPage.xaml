@@ -1,42 +1,473 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ChessClient.ViewModels"
+             xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
+             xmlns:helpers="clr-namespace:ChessClient.Helpers"
              x:Class="ChessClient.MainPage"
-             xmlns:viewmodels="clr-namespace:ChessClient.ViewModels"
-             x:DataType="viewmodels:MainViewModel"
-             Title="Шахматы Online">
+             Title="ChessMaster"
+             BackgroundColor="{AppThemeBinding Light=White, Dark=#0a0a0a}"
+             >
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+    <ContentPage.Resources>
 
-            <!-- Заголовок -->
-            <Label Text="Шахматы Online" 
-                   FontSize="Title" 
-                   HorizontalOptions="Center"
-                   HorizontalTextAlignment="Center"/>
+        <ResourceDictionary>
+            <!-- BoolToCommandConverter -->
+            <converters:BoolToChevronConverter x:Key="BoolToChevronConverter"/>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:RatingToBracketsConverter x:Key="RatingToBracketsConverter" />
+        </ResourceDictionary>
 
-            <!-- Кнопка входа -->
-            <Button Text="Войти" 
-                    Command="{Binding ShowLoginCommand}"
-                    BackgroundColor="#512BD4"
-                    TextColor="White"
-                    HeightRequest="50"/>
+        <Style TargetType="Frame" x:Key="GameModeButtonStyle">
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFFFFF, Dark=#2E2E2E}"/>
+            <Setter Property="BorderColor" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="HasShadow" Value="True"/>
+            <Setter Property="HorizontalOptions" Value="Fill"/>
+            <Setter Property="VerticalOptions" Value="Fill"/>
+        </Style>
 
-            <!-- Кнопка регистрации -->
-            <Button Text="Зарегистрироваться" 
-                    Command="{Binding ShowRegisterCommand}"
-                    BackgroundColor="#2b0b98"
-                    TextColor="White"
-                    HeightRequest="50" />
+        <!-- Стиль для слайдера сложности -->
+        <Style TargetType="Slider" x:Key="DifficultySliderStyle">
+            <Setter Property="Minimum" Value="1"/>
+            <Setter Property="Maximum" Value="10"/>
+            <Setter Property="ThumbColor" Value="#3E7BFA"/>
+            <Setter Property="MinimumTrackColor" Value="#3E7BFA"/>
+            <Setter Property="MaximumTrackColor" Value="#E0E0E0"/>
+        </Style>
 
-            <!-- Альтернативный вариант с горизонтальным расположением -->
-            <!--
-            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
-                <Button Text="Войти" ... />
-                <Button Text="Регистрация" ... />
-            </HorizontalStackLayout>
-            -->
+        <Style TargetType="Button" x:Key="LoginButtonStyle">
+            <Setter Property="Background" Value="{AppThemeBinding Light=#FFFFFF, Dark=#2E2E2E}"/>
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#2E2E2E, Dark=#FFFFFF}"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal"/>
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Opacity" Value="0.8"/>
+                                <Setter Property="Scale" Value="0.95"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
 
-        </VerticalStackLayout>
-    </ScrollView>
+        <Style TargetType="Button" x:Key="PlayButtonStyle">
+            <Setter Property="BackgroundColor" Value="#3E7BFA"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+            <Setter Property="CornerRadius" Value="30"/>
+            <Setter Property="HeightRequest" Value="60"/>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal"/>
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Opacity" Value="0.8"/>
+                                <Setter Property="Scale" Value="0.98"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Frame" x:Key="DropdownMenuStyle">
+            <Setter Property="TranslationY" Value="40"/>
+            <Setter Property="ScaleX" Value="0.9"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="AnchorY" Value="0"/>
+        </Style>
+
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, 80, *, Auto">
+        <!-- Верхняя AppBar с тенью -->
+        <Border Grid.Row="0"
+                Padding="0"
+                Stroke="Transparent"
+                ZIndex="5">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0,0,20,20"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#40000000"
+                        Offset="0,10"
+                        Radius="20"
+                        Opacity="0.2"/>
+            </Border.Shadow>
+
+            <Grid BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1E1E1E}"
+                  Padding="24,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Логотип и название -->
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Image Source="chess_logo.png"
+                           HeightRequest="32"
+                           WidthRequest="32"/>
+
+                    <Label Text="CHESSMASTER"
+                          FontFamily="RobotoBold"
+                          FontSize="20"
+                          TextColor="{AppThemeBinding Light=#2E2E2E, Dark=#FFFFFF}"
+                          VerticalOptions="Center"
+                          HorizontalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout
+                    Grid.Column="1">
+                    <!-- Кнопка входа -->
+                    <Button 
+                        Text="Войти"
+                        Style="{StaticResource LoginButtonStyle}"
+                        Command="{Binding LoginCommand}"
+                        HorizontalOptions="End"
+                        IsVisible="{Binding IsLogged, Converter={StaticResource InverseBoolConverter}}">
+                        <Button.ImageSource>
+                            <FontImageSource Glyph="&#xf2bd;"
+                                        FontFamily="FASolid"
+                                        Color="{AppThemeBinding Light=#2E2E2E, Dark=#FFFFFF}"
+                                        Size="16"/>
+                        </Button.ImageSource>
+                    </Button>
+
+                    <!-- <VerticalStackLayout
+                        HorizontalOptions="End">
+                        <Label
+                        Text="{Binding Username}"
+                        IsVisible="{Binding IsLogged}"
+                        VerticalOptions="Center"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        FontFamily="Chess Sans"/>
+
+                        <Label
+                        Text="{Binding Rating}"
+                        IsVisible="{Binding IsLogged}"
+                        VerticalOptions="Center"
+                        FontSize="10"/>
+                    </VerticalStackLayout> -->
+
+                    <Frame 
+                        x:Name="profileFrame"
+                        Padding="16,12"
+                        CornerRadius="14"
+                        HorizontalOptions="End"
+                        BackgroundColor="{AppThemeBinding Light=#f5f7fb, Dark=#1a233b}"
+                        BorderColor="{AppThemeBinding Light=#e0e0e0, Dark=#404040}"
+                        VerticalOptions="Start">
+
+                        <!-- Добавляем обработчик нажатий -->
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFrameTapped"/>
+                        </Frame.GestureRecognizers>
+
+                        <Frame.Shadow>
+                            <Shadow Brush="{AppThemeBinding Light=#30000000, Dark=#40FFFFFF}"
+                                Offset="3,3"
+                                Radius="12"/>
+                        </Frame.Shadow>
+
+                        <VerticalStackLayout Spacing="10">
+                            <!-- Имя игрока -->
+                            <HorizontalStackLayout>
+                                <Image
+                                    Source="user_icon.png" 
+                                    Margin="0,0,10,0"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    Aspect="AspectFit"/>
+
+                                <Label
+                                    Text="{Binding Username}"
+                                    Margin="0,0,3,0"
+                                    FontSize="16"
+                                    TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
+                                    FontFamily="OpenSansSemiBold"/>
+
+                                <Label
+                                    Text="{Binding Rating, Converter={StaticResource RatingToBracketsConverter}}"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
+                                    FontFamily="OpenSansRegular"
+                                    />
+                            </HorizontalStackLayout>
+                            <!-- Выпадающее меню -->
+                            <Frame 
+                                x:Name="dropdownMenu"
+                                Padding="0"
+                                CornerRadius="8"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#2c2c2c}"
+                                IsVisible="False"
+                                ScaleX="0.8"
+                                Opacity="0">  
+
+                                <Frame.Shadow>
+                                    <Shadow Brush="#40000000" Radius="10"/>
+                                </Frame.Shadow>
+
+                                <VerticalStackLayout Spacing="0">
+                                    <Grid 
+                                        BackgroundColor="Transparent">
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Image
+                                            Source="logout_icon.png"
+                                            WidthRequest="20"
+                                            HeightRequest="20"
+                                            Margin="0,0,8,0"/>
+
+                                        <Label
+                                            Text="Выход"
+                                            FontSize="14"
+                                            TextColor="{AppThemeBinding Light=#ff5555, Dark=#ff7777}"
+                                            FontFamily="OpenSansSemiBold"
+                                            VerticalOptions="Center"
+                                            Grid.Column="1"
+                                            />
+                                        <!-- Невидимая кнопка поверх всей строки -->
+                                        <Button Grid.ColumnSpan="2"
+                                                MinimumHeightRequest="0"
+                                                Command="{Binding LogoutCommand}"
+                                                BackgroundColor="Transparent"/>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Frame>
+
+                        </VerticalStackLayout>
+
+                        <Frame.Triggers>
+                            <DataTrigger
+                                TargetType="Frame"
+                                Binding="{Binding IsLogged}" 
+                                Value="False">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Frame.Triggers>
+                    </Frame>
+
+                </HorizontalStackLayout>
+               
+            </Grid>
+        </Border>
+
+
+        <!-- Строка выбора времени -->
+        <Frame Grid.Row="1"
+               BackgroundColor="#F5F5F5"
+               CornerRadius="12"
+               Padding="16,12"
+               Margin="16,8"
+               HasShadow="True">
+
+            <Grid ColumnDefinitions="50, *, 30">
+                <!-- Иконка -->
+                <Image Source="{Binding SelectedTime.Icon}"
+                       WidthRequest="50"/>
+
+                <!-- Название формата -->
+                <Label Text="{Binding SelectedTime.Name}"
+                       Grid.Column="1"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="20"/>
+
+                <!-- Стрелка (меняется при открытии) -->
+                <Label Text="{Binding IsTimePickerOpen, Converter={StaticResource BoolToChevronConverter}}"
+                       Grid.Column="2"
+                       FontSize="20"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End"
+                       />
+
+                <!-- Невидимая кнопка поверх всей строки -->
+                <Button Grid.ColumnSpan="3"
+                        Command="{Binding ToggleTimePickerCommand}"
+                        BackgroundColor="Transparent"/>
+            </Grid>
+        </Frame>
+
+        
+
+        <!-- Контейнер для режимов игры -->
+        <StackLayout Grid.Row="2" Spacing="10" Margin="16,8">
+            <!-- Кнопка "Игра с ботом" -->
+            <Frame Style="{StaticResource GameModeButtonStyle}"
+                   BackgroundColor="{Binding IsBotGameSelected, 
+                                   Converter={StaticResource BoolToColorConverter},
+                                   ConverterParameter='#3E7BFA;#F5F5F5'}"
+                   BorderColor="LightGray">
+
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame"
+                         Binding="{Binding IsBotGameSelected}"
+                         Value="True">
+                        <Setter Property="BorderColor" Value="#3E7BFA"/>
+                    </DataTrigger>
+                </Frame.Triggers>
+
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Игра с ботом" 
+                           FontSize="16"
+                           VerticalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{Binding IsBotGameSelected, 
+                                      Converter={StaticResource BoolToColorConverter},
+                                      ConverterParameter='#FFFFFF;#000000'}"/>
+
+                    <Image Source="robot_icon.png"
+                           Grid.Column="1"
+                           WidthRequest="24"/>
+
+                    <Button Grid.ColumnSpan="2"
+                            Command="{Binding SelectGameModeCommand}"
+                            CommandParameter="Bot"
+                            BackgroundColor="Transparent"/>
+                </Grid>
+            </Frame>
+
+            <!-- Слайдер сложности (появляется при выборе бота) -->
+            <StackLayout IsVisible="{Binding IsBotGameSelected}"
+                         Spacing="8"
+                         Margin="0,0,0,10">
+                <Label Text="Сложность бота:"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+
+                <Grid ColumnDefinitions="*, 40">
+                    <Slider Style="{StaticResource DifficultySliderStyle}"
+                            Value="{Binding BotDifficulty}"
+                            Grid.Column="0"/>
+
+                    <Label Text="{Binding BotDifficulty, StringFormat='{0}'}"
+                           Grid.Column="1"
+                           HorizontalOptions="Center"
+                           FontAttributes="Bold"/>
+                </Grid>
+            </StackLayout>
+
+            <!-- Кнопка "Игра по сети" -->
+            <Frame Style="{StaticResource GameModeButtonStyle}"
+                   BackgroundColor="{Binding IsOnlineGameSelected,
+                                   Converter={StaticResource BoolToColorConverter},
+                                   ConverterParameter='#3E7BFA;#F5F5F5'}"
+                   BorderColor="LightGray">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame"
+                     Binding="{Binding IsOnlineGameSelected}"
+                     Value="True">
+                        <Setter Property="BorderColor" Value="#3E7BFA"/>
+                    </DataTrigger>
+                </Frame.Triggers>
+
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Игра по сети" 
+                           FontSize="16"
+                           VerticalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{Binding IsOnlineGameSelected, 
+                                       Converter={StaticResource BoolToColorConverter},
+                                       ConverterParameter='#FFFFFF;#000000'}"/>
+                    <Image Source="wifi_icon.png"
+                           Grid.Column="1"
+                           WidthRequest="24"/>
+
+                    <Button Grid.ColumnSpan="2"
+                            Command="{Binding SelectGameModeCommand}"
+                            CommandParameter="Online"
+                            BackgroundColor="Transparent"/>
+                </Grid>
+            </Frame>
+
+            <!-- Кнопка "Из рук в руки" -->
+            <Frame Style="{StaticResource GameModeButtonStyle}"
+                   BackgroundColor="{Binding IsLocalGameSelected, 
+                                   Converter={StaticResource BoolToColorConverter},
+                                   ConverterParameter='#3E7BFA;#F5F5F5'}"
+                   BorderColor="LightGray">
+
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame"
+                        Binding="{Binding IsLocalGameSelected}"
+                        Value="True">
+                        <Setter Property="BorderColor" Value="#3E7BFA"/>
+                    </DataTrigger>
+                </Frame.Triggers>
+
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="Из рук в руки" 
+                           FontSize="16"
+                           VerticalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{Binding IsLocalGameSelected, 
+                                       Converter={StaticResource BoolToColorConverter},
+                                       ConverterParameter='#FFFFFF;#000000'}"/>
+                    <Image Source="handshake_icon.png"
+                           Grid.Column="1"
+                           WidthRequest="24"/>
+
+                    <Button Grid.ColumnSpan="2"
+                            Command="{Binding SelectGameModeCommand}"
+                            CommandParameter="Local"
+                            BackgroundColor="Transparent"/>
+                </Grid>
+            </Frame>
+        </StackLayout>
+
+        <!-- Выпадающий список (появляется при IsTimePickerOpen = true) -->
+        <Frame Grid.Row="2"
+               IsVisible="{Binding IsTimePickerOpen}"
+               BackgroundColor="White"
+               CornerRadius="12"
+               Margin="16,0,16,16"
+               HasShadow="True"
+               MaximumHeightRequest="300"
+               VerticalOptions="Start">
+
+            <CollectionView ItemsSource="{Binding AvailableTimes}"
+                   SelectionMode="Single"
+                   SelectedItem="{Binding SelectedTime}">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:GameTimeOption">
+                        <Grid Padding="16,12" ColumnDefinitions="24, *, 24">
+                            <Image Source="{Binding Icon}" WidthRequest="24"/>
+                            <Label Text="{Binding Name}" Grid.Column="1"/>
+                            <Label Text="✓" 
+                           Grid.Column="2"
+                           IsVisible="{Binding IsSelected}"
+                           FontAttributes="Bold"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Frame>
+
+        <Button Grid.Row="3"
+                Text="ИГРАТЬ"
+                Margin="16,8"
+                VerticalOptions="End"
+                Style="{StaticResource PlayButtonStyle}"
+                Command="{Binding NavigateToGameCommand}"/>
+
+        
+    </Grid>
 </ContentPage>

@@ -33,8 +33,8 @@ public class AppDbContext : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseMySql(
-                "Server=localhost;Database=chess_server_db;User=chess_admin;Password=;",
-                ServerVersion.AutoDetect("Server=localhost;Database=ChessDb;User=root;Password=jk3670x5ru3et9789f789rq8798;")
+                "Server=localhost;Database=chess_server_db;User=chess_admin;Password=jk3670x5ru3et9789f789rq8798;",
+                ServerVersion.AutoDetect("Server=localhost;Database=chess_server_db;User=chess_admin;Password=jk3670x5ru3et9789f789rq8798;")
             );
         }
     }

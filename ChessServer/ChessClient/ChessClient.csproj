@@ -42,28 +42,17 @@
 		<AndroidSigningKeyStore>my-app.keystore</AndroidSigningKeyStore>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+		<AndroidPackageFormat>aab</AndroidPackageFormat>
+		<AndroidKeyStore>False</AndroidKeyStore>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-	  <Debugger>Xamarin</Debugger>
-	  <AndroidKeyStore>True</AndroidKeyStore>
-	  <AndroidSigningKeyAlias>my-alias</AndroidSigningKeyAlias>
-	  <AndroidSigningKeyPass>1111</AndroidSigningKeyPass>
-	  <AndroidSigningStorePass>123456</AndroidSigningStorePass>
+	  <AndroidPackageFormat>apk</AndroidPackageFormat>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-	  <Debugger>Xamarin</Debugger>
-	  <AndroidKeyStore>True</AndroidKeyStore>
-	  <AndroidSigningKeyAlias>my-alias</AndroidSigningKeyAlias>
-	  <AndroidSigningKeyPass>1111</AndroidSigningKeyPass>
-	  <AndroidSigningStorePass>123456</AndroidSigningStorePass>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<AndroidKeyStore>True</AndroidKeyStore>
-		<AndroidSigningKeyStore>my-app.keystore</AndroidSigningKeyStore>
-		<AndroidSigningKeyAlias>my-alias</AndroidSigningKeyAlias>
-		<AndroidSigningKeyPass>ваш_пароль_ключа</AndroidSigningKeyPass>
-		<AndroidSigningStorePass>ваш_пароль_хранилища</AndroidSigningStorePass>
+	  <AndroidPackageFormat>apk</AndroidPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -91,15 +80,23 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Platforms\Android\assets\" />
+	  <ProjectReference Include="..\ChessEngine\ChessEngine.csproj" />
+	  <ProjectReference Include="..\ChessLibrary\ChessLibrary.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\GamePage.xaml.cs">
+	    <DependentUpon>GamePage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="Views\AuthPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\GamePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 	
-	
-
 </Project>

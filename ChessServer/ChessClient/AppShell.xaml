@@ -6,13 +6,15 @@
     xmlns:local="clr-namespace:ChessClient"
     xmlns:views="clr-namespace:ChessClient.Views"
     Shell.FlyoutBehavior="Flyout"
+    Shell.NavBarIsVisible="False"
     Title="ChessClient">
-
+    
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 
-    <ShellContent Route="auth" ContentTemplate="{DataTemplate views:AuthPage}" />
-
+    <ShellContent Route="AuthPage" ContentTemplate="{DataTemplate views:AuthPage}" />
+    <!-- Регистрируем страницу игры -->
+    <ShellContent Route="GamePage" ContentTemplate="{DataTemplate views:GamePage}"/>
 </Shell>
