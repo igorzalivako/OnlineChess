@@ -1,18 +1,19 @@
 ﻿using ChessEngine;
 using System.Text.Json;
+using ChessLibrary.Models.DTO;
 
 namespace ChessServer.Utilities
 {
     public class MoveSerializer
     {
-        public static string SerializeToJson(Move move)
+        public static string SerializeToJson(ChessMove move)
         {
             return JsonSerializer.Serialize(move);
         }
 
-        public static Move DeserializeFromJson(string json)
+        public static ChessMove DeserializeFromJson(string json)
         {
-            return JsonSerializer.Deserialize<Move>(json);
+            return JsonSerializer.Deserialize<ChessMove>(json);
         }
     }
 }

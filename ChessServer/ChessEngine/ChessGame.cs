@@ -9,9 +9,24 @@ namespace ChessEngine
     public class ChessGame
     {
         public Position Position { get; set; }
-        public void ApplyMove(Move move)
+        public bool ApplyMove(Move move, PieceColor attackerSide)
         {
-            Position.MakeMove(move);
+            MoveList availableMoves = LegalMovesGenerator.Generate(Position, attackerSide, false);
+            if (availableMoves.FirstOrDefault((Move m) => m.From == move.From && m.To == move.To) != null)
+            {
+                Position.MakeMove(move);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public MoveList GetValidMoves(PieceColor attackerSide)
+        {
+            MoveList availableMoves = LegalMovesGenerator.Generate(Position, attackerSide, false);
+            // lifted operator
+            return availableMoves;
         }
 
         public bool IsMoveValid(Move move)

@@ -2,6 +2,8 @@
 using ChessClient.ViewModels;
 using ChessClient.Services;
 using ChessClient.Views;
+using CommunityToolkit.Maui;
+using ChessClient.Models;
 
 namespace ChessClient
 {
@@ -10,7 +12,14 @@ namespace ChessClient
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
-#pragma warning disable CA1416 // Проверка совместимости платформы
+            builder
+                .UseMauiApp<App>()
+                .UseMauiCommunityToolkit() // Добавьте эту строку
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                });
+
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -19,7 +28,6 @@ namespace ChessClient
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIcons");
                 });
-#pragma warning restore CA1416 // Проверка совместимости платформы
             builder.Services.AddTransient<MainViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddSingleton<IAuthService, AuthService>();
@@ -28,6 +36,9 @@ namespace ChessClient
             builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddTransient<GameViewModel>();
             builder.Services.AddTransient<GamePage>();
+            builder.Services.AddSingleton<ChessBoardModel>();
+
+            //builder.Services.AddSingleton<GameService>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

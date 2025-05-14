@@ -9,7 +9,7 @@ namespace ChessClient.ViewModels
 {
     public partial class GameTimeOption : ObservableObject
     {
-        [ObservableProperty]
+        /*[ObservableProperty]
         private string _name;
 
         [ObservableProperty]
@@ -22,6 +22,20 @@ namespace ChessClient.ViewModels
 
         public bool IsSelected =>
             (Application.Current?.MainPage?.BindingContext is MainViewModel vm) &&
-            (vm.SelectedTime == this);
+            (vm.SelectedTime == this);*/
+        [ObservableProperty]
+        private string _name;
+
+        [ObservableProperty]
+        private string _icon;
+
+        [ObservableProperty]
+        private bool _isSelected; // Добавляем Observable свойство
+
+        public GameTimeOption(string name, string icon)
+        {
+            Name = name;
+            Icon = icon;
+        }
     }
 }

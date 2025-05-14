@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChessServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250426143055_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250510151607_MakeGameIdString")]
+    partial class MakeGameIdString
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,9 +30,8 @@ namespace ChessServer.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("CurrentFEN")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("GameModeMinutes")
+                        .HasColumnType("int");
 
                     b.PrimitiveCollection<string>("Moves")
                         .IsRequired()
@@ -43,6 +42,10 @@ namespace ChessServer.Migrations
 
                     b.Property<int>("PlayerWhiteId")
                         .HasColumnType("int");
+
+                    b.Property<byte[]>("PositionBytes")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -60,6 +63,9 @@ namespace ChessServer.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<int>("GameModeMinutes")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime(6)");

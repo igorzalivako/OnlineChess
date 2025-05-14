@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
@@ -13,7 +11,7 @@ namespace ChessClient.Services
 {
     public interface IAuthService
     {
-        Task<LoginResponse> LoginAsync(UserLoginDto loginDto);
+        Task<LoginResponseDto> LoginAsync(UserLoginDto loginDto);
         Task<AuthResponse> RegisterAsync(UserRegisterDto registerDto);
     }
 
@@ -27,7 +25,7 @@ namespace ChessClient.Services
             _httpClient = httpClient;
         }
 
-        public async Task<LoginResponse> LoginAsync(UserLoginDto loginDto)
+        public async Task<LoginResponseDto> LoginAsync(UserLoginDto loginDto)
         {
             try
             {
@@ -36,19 +34,19 @@ namespace ChessClient.Services
             }
             catch (Exception ex)
             {
-                return new LoginResponse { Success = false, Error = ex.Message };
+                return new LoginResponseDto { Success = false, Error = ex.Message };
             }
         }
 
-        private async Task<LoginResponse> HandleLoginResponse(HttpResponseMessage response)
+        private async Task<LoginResponseDto> HandleLoginResponse(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode)
             {
                 Debug.WriteLine(response);
-                return await response.Content.ReadFromJsonAsync<LoginResponse>();
+                return await response.Content.ReadFromJsonAsync<LoginResponseDto>();
             }
-            var errorResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            return errorResponse ?? new LoginResponse { Success = false, Error = "Unknown error occurred" };
+            var errorResponse = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+            return errorResponse ?? new LoginResponseDto { Success = false, Error = "Unknown error occurred" };
         }
 
         public async Task<AuthResponse> RegisterAsync(UserRegisterDto registerDto)
@@ -73,6 +71,11 @@ namespace ChessClient.Services
             }
             var errorResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
             return errorResponse ?? new AuthResponse { Success = false, Error = "Unknown error occurred" };
+        }
+
+        ~AuthService()
+        {
+            _httpClient.Dispose();
         }
     }
 }

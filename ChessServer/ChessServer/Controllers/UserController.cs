@@ -52,17 +52,17 @@ public class UsersController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto dto)
     {
-        LoginResponse authResponse; 
+        LoginResponseDto authResponse; 
         
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
-            authResponse = new LoginResponse() { Token = "", Success = false, Error = "Неверный пароль" };
+            authResponse = new LoginResponseDto() { Token = "", Success = false, Error = "Неверный пароль" };
             return Unauthorized(new { authResponse });
         }
 
         var token = GenerateJwtToken(user);
-        authResponse = new LoginResponse() { Token = token, Success = true, Error = "", Username = user.Username, Rating = user.Rating };
+        authResponse = new LoginResponseDto() { Token = token, Success = true, Error = "", Username = user.Username, Rating = user.Rating };
         return Ok(authResponse);
     }
     private string GenerateJwtToken(User user)
@@ -77,9 +77,8 @@ public class UsersController : ControllerBase
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[] {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            new Claim(ClaimTypes.Name, user.Username), // Используем ID вместо Username
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Username в отдельном claim
         };
 
         var token = new JwtSecurityToken(

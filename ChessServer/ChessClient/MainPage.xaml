@@ -326,7 +326,7 @@
 
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="Игра с ботом" 
-                           FontSize="16"
+                           FontSize="20"
                            VerticalOptions="Center"
                            HorizontalTextAlignment="Center"
                            TextColor="{Binding IsBotGameSelected, 
@@ -380,7 +380,7 @@
 
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="Игра по сети" 
-                           FontSize="16"
+                           FontSize="20"
                            VerticalOptions="Center"
                            HorizontalTextAlignment="Center"
                            TextColor="{Binding IsOnlineGameSelected, 
@@ -414,7 +414,7 @@
 
                 <Grid ColumnDefinitions="*, Auto">
                     <Label Text="Из рук в руки" 
-                           FontSize="16"
+                           FontSize="20"
                            VerticalOptions="Center"
                            HorizontalTextAlignment="Center"
                            TextColor="{Binding IsLocalGameSelected, 
@@ -443,18 +443,27 @@
                VerticalOptions="Start">
 
             <CollectionView ItemsSource="{Binding AvailableTimes}"
-                   SelectionMode="Single"
-                   SelectedItem="{Binding SelectedTime}">
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedTime}"
+                            Loaded="OnCollectionViewLoaded">
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:GameTimeOption">
                         <Grid Padding="16,12" ColumnDefinitions="24, *, 24">
-                            <Image Source="{Binding Icon}" WidthRequest="24"/>
-                            <Label Text="{Binding Name}" Grid.Column="1"/>
+                            <Image Source="{Binding Icon}" 
+                                   WidthRequest="24"
+                                   HorizontalOptions="Start"
+                                   VerticalOptions="Center"/>
+                            <Label Text="{Binding Name}" 
+                                   Grid.Column="1" 
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
                             <Label Text="✓" 
-                           Grid.Column="2"
-                           IsVisible="{Binding IsSelected}"
-                           FontAttributes="Bold"/>
+                                   Grid.Column="2"
+                                   IsVisible="{Binding IsSelected}"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
