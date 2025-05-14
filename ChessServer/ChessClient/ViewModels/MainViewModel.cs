@@ -1,7 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ChessClient.Views;
+using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -11,6 +14,12 @@ namespace ChessClient.ViewModels;
 [QueryProperty(nameof(Rating), "rating")]
 public partial class MainViewModel : ObservableObject
 {
+    public MainViewModel()
+    {
+        SelectedTime = AvailableTimes[0];
+        SelectedGameMode = "Bot";
+    }
+
     [RelayCommand]
     private async Task ShowLogin()
     {
@@ -44,16 +53,26 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    partial void OnSelectedTimeChanged(GameTimeOption oldValue, GameTimeOption newValue)
+    {
+        // Сбрасываем выделение у всех элементов
+        foreach (var time in AvailableTimes)
+        {
+            time.IsSelected = time == newValue;
+        }
+        IsTimePickerOpen = false;
+    }
+
     [ObservableProperty]
     private bool _isLogged;
 
     public ObservableCollection<GameTimeOption> AvailableTimes { get; } = new()
     {
-        new("1 минута", "dotnet_bot.png"),
-        new("3 минуты", "dotnet_bot.png"),
-        new("5 минут", "dotnet_bot.png"),
-        new("10 минут", "dotnet_bot.png"),
-        new("15 минут", "dotnet_bot.png")
+        new("Пуля 1 минута", "bullet.png"),
+        new("Блиц 3 минуты", "blitz.png"),
+        new("Блиц 5 минут", "blitz.png"),
+        new("Рапид 10 минут", "rapid.png"),
+        new("Рапид 30 минут", "rapid.png")
     };
 
 
@@ -61,12 +80,6 @@ public partial class MainViewModel : ObservableObject
     private void ToggleTimePicker()
     {
         IsTimePickerOpen = !IsTimePickerOpen;
-    }
-
-    partial void OnSelectedTimeChanged(GameTimeOption value)
-    {
-        IsTimePickerOpen = false; // Закрыть список после выбора
-        OnPropertyChanged(nameof(AvailableTimes)); // Обновить галочки
     }
 
     [ObservableProperty]
@@ -97,7 +110,43 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task NavigateToGame()
     {
-        await Shell.Current.GoToAsync("///GamePage");
+        if (IsOnlineGameSelected)
+        {
+            if (IsLogged)
+            {
+                try
+                {
+                    using var client = new HttpClient
+                    {
+                        Timeout = TimeSpan.FromSeconds(3) // Таймаут 3 секунды
+                    };
+
+                    // Запрос к специальному эндпоинту для проверки
+                    var response = await client.GetAsync($"{AppConfig.BaseUrl}/api/health");
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var popup = new ErrorPopup("Проверьте подключение к интернету и повторите попытку", "Нет соединения с сервером", "", 300, 250);
+                        await Application.Current.MainPage.ShowPopupAsync(popup);
+                    }
+                    else
+                    {
+                        // тут потом сделать передачу разного времени
+                        await Shell.Current.GoToAsync($"///GamePage?username={Username}&rating={Rating}&game_mode=online&minutes=5");
+                    }
+                }
+                catch
+                {
+                    var popup = new ErrorPopup("Проверьте подключение к интернету и повторите попытку", "Нет соединения с сервером", "", 300, 250);
+                    await Application.Current.MainPage.ShowPopupAsync(popup);
+                }
+            }
+            else
+            {
+                var popup = new ErrorPopup("Для онлайн игры войдите в профиль", "Выполните вход", "", 300, 200);
+                await Application.Current.MainPage.ShowPopupAsync(popup);
+            }
+        }
+        
     }
 
     [RelayCommand]

@@ -34,5 +34,13 @@ namespace ChessClient
                 );
             }
         }
+
+        private void OnCollectionViewLoaded(object sender, EventArgs e)
+        {
+            if (BindingContext is MainViewModel vm && vm.SelectedTime == null)
+            {
+                vm.SelectedTime = vm.AvailableTimes?.FirstOrDefault();
+            }
+        }
     }
 }

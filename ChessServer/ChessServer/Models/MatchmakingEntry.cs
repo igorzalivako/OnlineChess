@@ -8,5 +8,6 @@ namespace ChessServer.Models
         public int UserId { get; set; }
         public int Rating { get; set; }
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+        public int GameModeMinutes { get; set; } // Добавлено новое поле
     }
 }

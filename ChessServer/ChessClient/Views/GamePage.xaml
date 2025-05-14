@@ -1,70 +1,241 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:ChessClient.ViewModels"
-             xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
              x:Class="ChessClient.Views.GamePage"
-             Title="Chess Board">
+             xmlns:vm="clr-namespace:ChessClient.ViewModels"
+             xmlns:models="clr-namespace:ChessClient.Models.Board"
+             xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
+             xmlns:behaviors="clr-namespace:ChessClient.Behaviors" 
+             x:DataType="vm:GameViewModel"
+             Title="Chess Game"
+             x:Name="CurrentPage">
 
     <ContentPage.Resources>
-        <ResourceDictionary>
-            <converters:DivideBy8Converter x:Key="DivideBy8Converter"/>
-        </ResourceDictionary>
+        <Style TargetType="Frame">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HasShadow" Value="True"/>
+            <Setter Property="CornerRadius" Value="2"/>
+        </Style>
+
+        <Style TargetType="Image">
+            <Setter Property="Aspect" Value="AspectFit"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <converters:NullToBoolConverter x:Key="NullToBoolConverter" />
+        <converters:SquareColorToViewColorConverter x:Key="SquareColorToViewColorConverter" />
+        <converters:RatingToBracketsConverter x:Key="RatingToBracketsConverter" />
+        <converters:DraggingOpacityConverter x:Key="DraggingOpacityConverter" />
+        <converters:DraggingPositionToRectConverter x:Key="DraggingPositionToRectConverter" />
     </ContentPage.Resources>
+   
 
-    <Grid x:Name="ChessBoardContainer">
-        <!-- Шахматная доска -->
-        <CollectionView x:Name="ChessBoardGrid"
-                        ItemsSource="{Binding Squares}"
-                        ItemsLayout="8, Grid, Vertical">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <BoxView Color="{Binding Color}">
-                        <BoxView.WidthRequest>
-                            <MultiBinding Converter="{StaticResource DivideBy8Converter}">
-                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Width"/>
-                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Height"/>
-                            </MultiBinding>
-                        </BoxView.WidthRequest>
-                        <BoxView.HeightRequest>
-                            <MultiBinding Converter="{StaticResource DivideBy8Converter}">
-                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Width"/>
-                                <Binding Source="{x:Reference ChessBoardGrid}" Path="Height"/>
-                            </MultiBinding>
-                        </BoxView.HeightRequest>
-                    </BoxView>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto, Auto" 
+          Padding="10"
+          VerticalOptions="Fill"
+          HorizontalOptions="Fill">
 
-        <!-- Буквы (a-h) внизу -->
-        <HorizontalStackLayout AbsoluteLayout.LayoutBounds="0.1,0.8,0.8,0.1"
-                                AbsoluteLayout.LayoutFlags="All"
-                                HorizontalOptions="Center"
-                                Spacing="0">
-            <Label Text="a" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="b" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="c" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="d" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="e" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="f" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="g" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-            <Label Text="h" WidthRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Width, Converter={StaticResource DivideBy8Converter}}" HorizontalOptions="Center"/>
-        </HorizontalStackLayout>
+        <!-- Верхняя полоска с именем противника -->
+        <Frame 
+            Grid.Row="0"
+            Padding="16,12"
+            CornerRadius="14"
+            BackgroundColor="{AppThemeBinding Light=#f5f7fb, Dark=#1a233b}"
+            BorderColor="{AppThemeBinding Light=#e0e0e0, Dark=#404040}"
+            VerticalOptions="Start"
+            HorizontalOptions="Fill">
 
-            <!-- Цифры (1-8) слева -->
-        <VerticalStackLayout AbsoluteLayout.LayoutBounds="0,0,0.1,0.8"
-                               AbsoluteLayout.LayoutFlags="All"
-                               VerticalOptions="Center"
-                               Spacing="0">
-            <Label Text="8" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="7" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="6" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="5" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="4" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="3" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="2" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-            <Label Text="1" HeightRequest="{Binding Source={x:Reference ChessBoardGrid}, Path=Height, Converter={StaticResource DivideBy8Converter}}" VerticalOptions="Center"/>
-        </VerticalStackLayout>
+            <Frame.Shadow>
+                <Shadow Brush="{AppThemeBinding Light=#30000000, Dark=#40FFFFFF}"
+                        Offset="3,3"
+                        Radius="12"/>
+            </Frame.Shadow>
+            <!-- Имя игрока -->
+            <HorizontalStackLayout>
+                <Image
+                    Source="user_icon.png" 
+                    Margin="0,0,10,0"
+                    WidthRequest="24"
+                    HeightRequest="24"
+                    Aspect="AspectFit"/>
+
+                <Label
+                    Text="{Binding OpponentUsername}"
+                    Margin="0,0,3,0"
+                    FontSize="16"
+                    TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
+                    FontFamily="OpenSansSemiBold"/>
+
+                <Label
+                    Text="{Binding OpponentRating, Converter={StaticResource RatingToBracketsConverter}}"
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
+                    FontFamily="OpenSansRegular"
+            />
+            </HorizontalStackLayout>
+        </Frame>
+
+        <!-- Chess Board 
+        <Frame Grid.Row="1"
+               CornerRadius="4"
+               BorderColor="{AppThemeBinding Light=Black, Dark=White}"
+               Padding="2">
+
+            <Grid x:Name="ChessGrid"
+                  VerticalOptions="Center"
+                  HorizontalOptions="Center">
+                
+                <Grid.Behaviors>
+                    <behaviors:BoardGridBehavior />
+                </Grid.Behaviors>
+
+                <CollectionView ItemsSource="{Binding FlatBoard}"
+                                SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="8"
+                                         HorizontalItemSpacing="0"
+                                         VerticalItemSpacing="0"/>
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:BoardSquare">
+                            <Grid>
+                                <BoxView Color="{Binding Color, Converter={StaticResource SquareColorToViewColorConverter}}"
+                                         InputTransparent="True"/>
+
+                                <Image Source="{Binding Piece.Image}"
+                                       IsVisible="{Binding Piece, Converter={StaticResource NullToBoolConverter}}"
+                                       Opacity="{Binding IsDragging, Converter={StaticResource DraggingOpacityConverter}}">
+                                    <Image.GestureRecognizers>
+                                        <! Начало перетаскивания 
+                                        <DragGestureRecognizer 
+                                            CanDrag="True"
+                                            DragStartingCommand="{Binding DragStartingCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"
+                                            DragStartingCommandParameter="{Binding Position}"
+                                            />
+
+                                        <! Область для дропа 
+                                        <DropGestureRecognizer
+                                            AllowDrop="True"
+                                            DragOverCommand="{Binding DragOverCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"
+                                            DropCommand="{Binding DropCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"/>
+                                    </Image.GestureRecognizers>
+                                </Image>
+
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Frame> -->
+        <Frame Grid.Row="1"
+               CornerRadius="4"
+               BorderColor="{AppThemeBinding Light=Black, Dark=White}"
+               Padding="2">
+            <AbsoluteLayout x:Name="BoardAbsoluteLayout"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            HeightRequest="360"
+                            WidthRequest="360">
+                <!-- Доска: CollectionView (или Grid) -->
+                <CollectionView x:Name="BoardCollectionView"
+                                ItemsSource="{Binding FlatBoard}"
+                                SelectionMode="None"
+                                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                                AbsoluteLayout.LayoutFlags="All">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="8"
+                                         HorizontalItemSpacing="0"
+                                         VerticalItemSpacing="0"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:BoardSquare">
+                            <Grid>
+                                <BoxView Color="{Binding Color, Converter={StaticResource SquareColorToViewColorConverter}}"
+                                         InputTransparent="True"/>
+
+                                <Ellipse BackgroundColor="Gray"
+                                         IsVisible="{Binding CanMoveTo}"
+                                         Margin="10">
+                                </Ellipse>
+
+                                <Image
+                                    Source="{Binding Piece.Image}"
+                                    IsVisible="{Binding Piece, Converter={StaticResource NullToBoolConverter}}"
+                                    Opacity="{Binding IsDragging, Converter={StaticResource DraggingOpacityConverter}}"
+                                    InputTransparent="False">
+                                    <Image.GestureRecognizers>
+                                        <PanGestureRecognizer
+                                            
+                                            PanUpdated="OnPiecePanUpdated"/>
+                                    </Image.GestureRecognizers>
+                                </Image>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <!-- Летающая фигура (поверх доски), если есть -->
+                <Image
+                    x:Name="DraggingPieceImage"
+                    IsVisible="{Binding DraggingSquare, Converter={StaticResource NullToBoolConverter}}"
+                    Source="{Binding DraggingSquare.Piece.Image}"
+                    WidthRequest="{Binding CellSize}"
+                    HeightRequest="{Binding CellSize}"
+                    AbsoluteLayout.LayoutBounds="{Binding DraggingRect}"
+                    />
+            </AbsoluteLayout>
+        </Frame>
+        
+        <Frame 
+            Grid.Row="2"
+            Padding="16,12"
+            CornerRadius="14"
+            BackgroundColor="{AppThemeBinding Light=#f5f7fb, Dark=#1a233b}"
+            BorderColor="{AppThemeBinding Light=#e0e0e0, Dark=#404040}"
+            VerticalOptions="Start"
+            HorizontalOptions="Fill">
+
+            <Frame.Shadow>
+                <Shadow Brush="{AppThemeBinding Light=#30000000, Dark=#40FFFFFF}"
+                        Offset="3,3"
+                        Radius="12"/>
+            </Frame.Shadow>
+            <!-- Имя игрока -->
+            <HorizontalStackLayout>
+                <Image
+                    Source="user_icon.png" 
+                    Margin="0,0,10,0"
+                    WidthRequest="24"
+                    HeightRequest="24"
+                    Aspect="AspectFit"/>
+
+                <Label
+                    Text="{Binding Username}"
+                    Margin="0,0,3,0"
+                    FontSize="16"
+                    TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
+                    FontFamily="OpenSansSemiBold"/>
+
+                <Label
+                    Text="{Binding Rating, Converter={StaticResource RatingToBracketsConverter}}"
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
+                    FontFamily="OpenSansRegular"
+                    />
+            </HorizontalStackLayout>
+        </Frame>
+
+        <Label Grid.Row="3"
+               Text="{Binding StatusMessage}"
+               HorizontalOptions="Center"
+               Margin="0,20"/>
+
+        <Button Grid.Row="4"
+                Text="Сдаться"
+                HorizontalOptions="Center"
+                Margin="0,10"
+                WidthRequest="120"/>
     </Grid>
 </ContentPage>

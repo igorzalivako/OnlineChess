@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary.Models.DTO
 {
-    public class LoginResponse
+    public class LoginResponseDto
     {
         public string Token { get; set; }
         public bool Success { get; set; }
