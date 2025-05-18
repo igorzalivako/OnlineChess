@@ -1,4 +1,5 @@
-﻿using ChessClient.Views;
+﻿using ChessClient.Models;
+using ChessClient.Views;
 using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +19,15 @@ public partial class MainViewModel : ObservableObject
     {
         SelectedTime = AvailableTimes[0];
         SelectedGameMode = "Bot";
+    }
+
+    [ObservableProperty]
+    private string _selectedPlayerColor = "white"; // "white" или "black"
+
+    [RelayCommand]
+    private void SelectPlayerColor(string color)
+    {
+        SelectedPlayerColor = color;
     }
 
     [RelayCommand]
@@ -68,11 +78,11 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<GameTimeOption> AvailableTimes { get; } = new()
     {
-        new("Пуля 1 минута", "bullet.png"),
-        new("Блиц 3 минуты", "blitz.png"),
-        new("Блиц 5 минут", "blitz.png"),
-        new("Рапид 10 минут", "rapid.png"),
-        new("Рапид 30 минут", "rapid.png")
+        new("Пуля 1 минута", "bullet.png", 1),
+        new("Блиц 3 минуты", "blitz.png", 3),
+        new("Блиц 5 минут", "blitz.png", 5),
+        new("Рапид 10 минут", "rapid.png", 10),
+        new("Рапид 30 минут", "rapid.png", 30)
     };
 
 
@@ -130,8 +140,7 @@ public partial class MainViewModel : ObservableObject
                     }
                     else
                     {
-                        // тут потом сделать передачу разного времени
-                        await Shell.Current.GoToAsync($"///GamePage?username={Username}&rating={Rating}&game_mode=online&minutes=5");
+                        await Shell.Current.GoToAsync($"///GamePage?username={Username}&rating={Rating}&game_mode=online&minutes={SelectedTime.MinutesCount}&complexity=&bot_color=");
                     }
                 }
                 catch
@@ -146,7 +155,20 @@ public partial class MainViewModel : ObservableObject
                 await Application.Current.MainPage.ShowPopupAsync(popup);
             }
         }
-        
+        else if (IsBotGameSelected)
+        {
+            // добавить изменение сложности и цвета
+            string botColor;
+            if (SelectedPlayerColor == "white")
+            {
+                botColor = "black";
+            }
+            else
+            {
+                botColor = "white";
+            }
+            await Shell.Current.GoToAsync($"///GamePage?username={Username ?? "Игрок"}&rating={Rating ?? "1000"}&game_mode=bot&minutes=1&complexity={BotDifficulty.ToString()}&bot_color={botColor}");
+        }
     }
 
     [RelayCommand]

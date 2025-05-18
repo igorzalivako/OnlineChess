@@ -59,12 +59,13 @@
                     </VerticalStackLayout>
 
                     <!-- Repeat password-->
-                    <VerticalStackLayout Spacing="5">
+                    <VerticalStackLayout Spacing="5"
+                                         IsVisible="{Binding IsRegisterMode}">
                         <Label Text="Повторите пароль" FontAttributes="Bold" />
                         <Entry Text="{Binding RepeatedPassword}" 
                                Placeholder="Повторите пароль" 
                                IsPassword="True"
-                               IsVisible="{Binding IsRegisterMode}"/>
+                               />
                     </VerticalStackLayout>
                     
                     <!-- Error Message -->

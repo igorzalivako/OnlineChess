@@ -77,8 +77,8 @@ public class UsersController : ControllerBase
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[] {
-            new Claim(ClaimTypes.Name, user.Username), // Используем ID вместо Username
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Username в отдельном claim
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
         };
 
         var token = new JwtSecurityToken(

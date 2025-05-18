@@ -4,6 +4,7 @@
              xmlns:viewModels="clr-namespace:ChessClient.ViewModels"
              xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
              xmlns:helpers="clr-namespace:ChessClient.Helpers"
+             xmlns:models="clr-namespace:ChessClient.Models"
              x:Class="ChessClient.MainPage"
              Title="ChessMaster"
              BackgroundColor="{AppThemeBinding Light=White, Dark=#0a0a0a}"
@@ -355,13 +356,50 @@
                 <Grid ColumnDefinitions="*, 40">
                     <Slider Style="{StaticResource DifficultySliderStyle}"
                             Value="{Binding BotDifficulty}"
-                            Grid.Column="0"/>
+                            Grid.Column="0"
+                            Minimum="500"
+                            Maximum="5000"/>
 
                     <Label Text="{Binding BotDifficulty, StringFormat='{0}'}"
                            Grid.Column="1"
                            HorizontalOptions="Center"
                            FontAttributes="Bold"/>
                 </Grid>
+                
+                <!-- Выбор цвета игрока при игре с ботом -->
+                <StackLayout IsVisible="{Binding IsBotGameSelected}" Spacing="8" Margin="0,0,0,10">
+                    <Label Text="Выберите цвет фигур:"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+
+                    <HorizontalStackLayout Spacing="24" HorizontalOptions="Center">
+                        <!-- Белые фигуры -->
+                        <Frame Padding="4"
+                               CornerRadius="14"
+                               BorderColor="{Binding SelectedPlayerColor, Converter={converters:SelectedColorToFrameBorderConverter}, ConverterParameter=white}"
+                               BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#232323}">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPlayerColorCommand}" CommandParameter="white"/>
+                            </Frame.GestureRecognizers>
+                            <Image Source="white_king.png"
+                                   WidthRequest="48"
+                                   HeightRequest="48"/>
+                        </Frame>
+
+                        <!-- Черные фигуры -->
+                        <Frame Padding="4"
+                               CornerRadius="14"
+                               BorderColor="{Binding SelectedPlayerColor, Converter={converters:SelectedColorToFrameBorderConverter}, ConverterParameter=black}"
+                               BackgroundColor="{AppThemeBinding Light=#f9f9f9, Dark=#232323}">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPlayerColorCommand}" CommandParameter="black"/>
+                            </Frame.GestureRecognizers>
+                            <Image Source="black_king.png"
+                                   WidthRequest="48"
+                                   HeightRequest="48"/>
+                        </Frame>
+                    </HorizontalStackLayout>
+                </StackLayout>
             </StackLayout>
 
             <!-- Кнопка "Игра по сети" -->
@@ -372,8 +410,8 @@
                    BorderColor="LightGray">
                 <Frame.Triggers>
                     <DataTrigger TargetType="Frame"
-                     Binding="{Binding IsOnlineGameSelected}"
-                     Value="True">
+                        Binding="{Binding IsOnlineGameSelected}"
+                        Value="True">
                         <Setter Property="BorderColor" Value="#3E7BFA"/>
                     </DataTrigger>
                 </Frame.Triggers>
@@ -448,7 +486,7 @@
                             Loaded="OnCollectionViewLoaded">
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:GameTimeOption">
+                    <DataTemplate x:DataType="models:GameTimeOption">
                         <Grid Padding="16,12" ColumnDefinitions="24, *, 24">
                             <Image Source="{Binding Icon}" 
                                    WidthRequest="24"

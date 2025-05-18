@@ -4,8 +4,8 @@ namespace ChessEngine
 {
     public class AI
     {
-        const int POSITIVE_INFINITY = int.MaxValue - 2000;
-        const int NEGATIVE_INFINITY = int.MinValue + 2000;
+        const int POSITIVE_INFINITY = +1_000_000_000;
+        const int NEGATIVE_INFINITY = -1_000_000_000;
 
         private static volatile bool _stopSearch;
         private readonly OpeningBook _openingBook;
@@ -47,7 +47,7 @@ namespace ChessEngine
 
                 while (!bestMoveThread.IsCompleted)
                 {
-                    long elapsedMs = (Stopwatch.GetTimestamp() - timeStart) * 1_000_000 / Stopwatch.Frequency;
+                    long elapsedMs = (Stopwatch.GetTimestamp() - timeStart) * 1_000 / Stopwatch.Frequency;
                     if (elapsedMs >= maxMs)
                     {
                         updateBestMove = false;

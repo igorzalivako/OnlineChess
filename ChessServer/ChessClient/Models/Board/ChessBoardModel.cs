@@ -118,12 +118,12 @@ namespace ChessClient.Models
 
         public void MakeMove(ChessMove move)
         {
-            var movedPiece = BoardSquares[move.FromX, move.FromY];
-            BoardSquares[move.FromX, move.FromY] = null;
-            BoardSquares[move.ToX, move.ToY] = movedPiece;
+            var movedPiece = BoardSquares[move.FromX, move.FromY].Piece;
+            BoardSquares[move.FromX, move.FromY].Piece = null;
+            BoardSquares[move.ToX, move.ToY].Piece = movedPiece;
         }
 
-        internal void LoadPositionFromFen(string fen)
+        public void LoadPositionFromFen(string fen, bool needsCreateNewBoard = true)
         {
             BoardSquares = CreateBoard();
             int x = 0, y = 7;
@@ -149,6 +149,10 @@ namespace ChessClient.Models
                 }
                 else if (c >= '0' && c <= '9')
                 {
+                    for (int i = 0; i < int.Parse(c.ToString()); i++)
+                    {
+                        BoardSquares[x + i, y].Position = new(x + i, y);
+                    }
                     x += int.Parse(c.ToString());
                 }
                 else
@@ -225,6 +229,63 @@ namespace ChessClient.Models
             foreach (BoardSquare boardSquare in BoardSquares)
             {
                 boardSquare.CanMoveTo = false; 
+            }
+        }
+
+        public void EndDrag()
+        {
+            foreach (BoardSquare boardSquare in BoardSquares)
+            {
+                boardSquare.IsDragging = false;
+            }
+        }
+
+        public void UpdatePositionFromFen(string newFenPosition)
+        {
+            int x = 0, y = 7;
+            PieceColor pieceColor;
+            PieceType pieceType;
+            foreach (char c in newFenPosition)
+            {
+                if (c >= 'A' && c <= 'Z')
+                {
+                    pieceColor = PieceColor.White;
+                    pieceType = GetPieceFromFen(c.ToString());
+                    if (BoardSquares[x, y].Piece == null || BoardSquares[x, y].Piece.Type != pieceType || BoardSquares[x, y].Piece.Color != pieceColor)
+                    {
+                        BoardSquares[x, y].Piece = new ChessPiece() { Color = pieceColor, Type = pieceType };
+                        BoardSquares[x, y].Position = new(x, y);
+                    }
+                    x++;
+                }
+                else if (c >= 'a' && c <= 'z')
+                {
+                    pieceColor = PieceColor.Black;
+                    pieceType = GetPieceFromFen(c.ToString());
+                    if (BoardSquares[x, y].Piece == null || BoardSquares[x, y].Piece.Type != pieceType || BoardSquares[x, y].Piece.Color != pieceColor)
+                    {
+                        BoardSquares[x, y].Piece = new ChessPiece() { Color = pieceColor, Type = pieceType };
+                        BoardSquares[x, y].Position = new(x, y);
+                    }
+                    x++;
+                }
+                else if (c >= '0' && c <= '9')
+                {
+                    for (int i = 0; i < int.Parse(c.ToString()); i++)
+                    {
+                        if (BoardSquares[x + i, y].Piece != null)
+                        {
+                            BoardSquares[x + i, y].Piece = null;
+                        }
+                        BoardSquares[x + i, y].Position = new(x + i, y);
+                    }
+                    x += int.Parse(c.ToString());
+                }
+                else
+                {
+                    y--;
+                    x = 0;
+                }
             }
         }
     }
