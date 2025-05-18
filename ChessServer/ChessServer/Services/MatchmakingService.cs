@@ -1,7 +1,9 @@
 ﻿using ChessEngine;
+using ChessLibrary.Converters;
 using ChessLibrary.Models.DTO;
 using ChessServer.Data;
 using ChessServer.Models;
+using ChessServer.Utilities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +55,11 @@ public class MatchmakingService
             PlayerBlackId = player2,
             Position = new ChessEngine.Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"),
             GameModeMinutes = gameModeMinutes,
+            Status = GameStatus.Active, 
+            ActivePlayerId = player1,
+            TimeLeftWhite = gameModeMinutes * 60,
+            TimeLeftBlack = gameModeMinutes * 60,
+            LastMoveTime = DateTime.UtcNow,
         };
 
         _db.Games.Add(game);
@@ -80,7 +87,9 @@ public class MatchmakingService
                 YourColor = "white",
                 OpponentUsername = secondPlayer.Username,
                 OpponentRating = secondPlayer.Rating, 
-                AvailableMoves = ConvertToChessMoveList(moveList)
+                AvailableMoves = ConverterToMoveList.ConvertToChessMoveList(moveList),
+                WhiteLeftTime = gameModeMinutes * 60,
+                BlackLeftTime = gameModeMinutes * 60,
 
             });
         await _hubContext.Clients.Users(player2.ToString())
@@ -90,22 +99,9 @@ public class MatchmakingService
                 Position = game.GetFen(),
                 YourColor = "black",
                 OpponentUsername = firstPlayer.Username,
-                OpponentRating = secondPlayer.Rating
+                OpponentRating = secondPlayer.Rating,
+                WhiteLeftTime= gameModeMinutes * 60,
+                BlackLeftTime= gameModeMinutes * 60,
             });
-    }
-
-    private List<ChessMove> ConvertToChessMoveList(MoveList moveList)
-    {
-        List<ChessMove> result = new List<ChessMove>(); 
-        for (int i = 0; i < moveList.Size; i++) 
-        {
-            ChessMove move = new ChessMove();
-            move.FromX = moveList[i].From % 8;
-            move.FromY = moveList[i].From / 8;
-            move.ToX = moveList[i].To % 8;
-            move.ToY = moveList[i].To / 8;
-            result.Add(move);
-        }
-        return result;
     }
 }

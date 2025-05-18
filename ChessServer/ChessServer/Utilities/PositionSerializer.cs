@@ -49,7 +49,7 @@ namespace ChessServer.Utilities
             }
             writer.Write(pieces.SideBitboards[(int)PieceColor.White].Value);
             writer.Write(pieces.SideBitboards[(int)PieceColor.Black].Value);
-            writer.Write(pieces.InversionSideBitboards[(int)PieceColor.Black].Value);
+            writer.Write(pieces.InversionSideBitboards[(int)PieceColor.White].Value);
             writer.Write(pieces.InversionSideBitboards[(int)PieceColor.Black].Value);
             writer.Write(pieces.All.Value);
             writer.Write(pieces.Empty.Value);

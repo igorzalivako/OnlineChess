@@ -8,8 +8,8 @@ namespace ChessEngine
 {
     public class RepetitionHistory
     {
-        public List<ZobristHash> Hashes { get { return _hashes; } }
         private List<ZobristHash> _hashes = new List<ZobristHash>();
+        public List<ZobristHash> Hashes { get { return _hashes; } }
 
         public void AddPosition(ZobristHash hash)
         {

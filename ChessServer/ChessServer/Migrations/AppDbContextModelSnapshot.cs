@@ -24,11 +24,18 @@ namespace ChessServer.Migrations
 
             modelBuilder.Entity("ChessServer.Models.Game", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("varchar(255)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("ActivePlayerId")
+                        .HasColumnType("int");
 
                     b.Property<int>("GameModeMinutes")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("LastMoveTime")
+                        .HasColumnType("datetime(6)");
 
                     b.PrimitiveCollection<string>("Moves")
                         .IsRequired()
@@ -47,6 +54,12 @@ namespace ChessServer.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("TimeLeftBlack")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimeLeftWhite")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

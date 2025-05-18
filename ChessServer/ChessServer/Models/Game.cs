@@ -24,6 +24,14 @@ namespace ChessServer.Models
         public List<string> Moves { get; set; } = new();
         public GameStatus Status { get; set; } = GameStatus.Waiting;
 
+
+        // Новые поля для контроля времени
+        public int TimeLeftWhite { get; set; } // в секундах
+        public int TimeLeftBlack { get; set; } // в секундах
+        public DateTime LastMoveTime { get; set; }
+        public int ActivePlayerId { get; set; } // чей сейчас ход
+
+
         public string GetFen()
         {
             StringBuilder fen = new StringBuilder();

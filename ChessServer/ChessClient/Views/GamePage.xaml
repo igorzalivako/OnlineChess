@@ -27,6 +27,7 @@
         <converters:RatingToBracketsConverter x:Key="RatingToBracketsConverter" />
         <converters:DraggingOpacityConverter x:Key="DraggingOpacityConverter" />
         <converters:DraggingPositionToRectConverter x:Key="DraggingPositionToRectConverter" />
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
     </ContentPage.Resources>
    
 
@@ -51,84 +52,41 @@
                         Radius="12"/>
             </Frame.Shadow>
             <!-- Имя игрока -->
-            <HorizontalStackLayout>
-                <Image
-                    Source="user_icon.png" 
-                    Margin="0,0,10,0"
-                    WidthRequest="24"
-                    HeightRequest="24"
-                    Aspect="AspectFit"/>
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <HorizontalStackLayout>
+                    <Image
+                        Source="user_icon.png" 
+                        Margin="0,0,10,0"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        Aspect="AspectFit"/>
+
+                    <Label
+                        Text="{Binding OpponentUsername}"
+                        Margin="0,0,3,0"
+                        FontSize="16"
+                        TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
+                        FontFamily="OpenSansSemiBold"/>
+
+                    <Label
+                        Text="{Binding OpponentRating, Converter={StaticResource RatingToBracketsConverter}}"
+                        FontSize="12"
+                        TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
+                        FontFamily="OpenSansRegular"/>
+                </HorizontalStackLayout>
 
                 <Label
-                    Text="{Binding OpponentUsername}"
-                    Margin="0,0,3,0"
-                    FontSize="16"
-                    TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
-                    FontFamily="OpenSansSemiBold"/>
-
-                <Label
-                    Text="{Binding OpponentRating, Converter={StaticResource RatingToBracketsConverter}}"
-                    FontSize="12"
-                    TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
-                    FontFamily="OpenSansRegular"
-            />
-            </HorizontalStackLayout>
+                    Grid.Column="1"
+                    Text="{Binding OpponentTimeFormatted}"
+                    FontSize="20"
+                    FontFamily="OpenSansSemiBold"
+                    TextColor="DarkRed"
+                    VerticalOptions="Center"
+                    Padding="16,0,0,0"
+                    IsVisible="{Binding IsBotGame, Converter={StaticResource InverseBoolConverter}}"/>
+            </Grid>
         </Frame>
 
-        <!-- Chess Board 
-        <Frame Grid.Row="1"
-               CornerRadius="4"
-               BorderColor="{AppThemeBinding Light=Black, Dark=White}"
-               Padding="2">
-
-            <Grid x:Name="ChessGrid"
-                  VerticalOptions="Center"
-                  HorizontalOptions="Center">
-                
-                <Grid.Behaviors>
-                    <behaviors:BoardGridBehavior />
-                </Grid.Behaviors>
-
-                <CollectionView ItemsSource="{Binding FlatBoard}"
-                                SelectionMode="None">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical"
-                                         Span="8"
-                                         HorizontalItemSpacing="0"
-                                         VerticalItemSpacing="0"/>
-                    </CollectionView.ItemsLayout>
-
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:BoardSquare">
-                            <Grid>
-                                <BoxView Color="{Binding Color, Converter={StaticResource SquareColorToViewColorConverter}}"
-                                         InputTransparent="True"/>
-
-                                <Image Source="{Binding Piece.Image}"
-                                       IsVisible="{Binding Piece, Converter={StaticResource NullToBoolConverter}}"
-                                       Opacity="{Binding IsDragging, Converter={StaticResource DraggingOpacityConverter}}">
-                                    <Image.GestureRecognizers>
-                                        <! Начало перетаскивания 
-                                        <DragGestureRecognizer 
-                                            CanDrag="True"
-                                            DragStartingCommand="{Binding DragStartingCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"
-                                            DragStartingCommandParameter="{Binding Position}"
-                                            />
-
-                                        <! Область для дропа 
-                                        <DropGestureRecognizer
-                                            AllowDrop="True"
-                                            DragOverCommand="{Binding DragOverCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"
-                                            DropCommand="{Binding DropCommand, Source={RelativeSource AncestorType={x:Type vm:GameViewModel}}}"/>
-                                    </Image.GestureRecognizers>
-                                </Image>
-
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Grid>
-        </Frame> -->
         <Frame Grid.Row="1"
                CornerRadius="4"
                BorderColor="{AppThemeBinding Light=Black, Dark=White}"
@@ -187,7 +145,7 @@
                     />
             </AbsoluteLayout>
         </Frame>
-        
+
         <Frame 
             Grid.Row="2"
             Padding="16,12"
@@ -202,40 +160,49 @@
                         Offset="3,3"
                         Radius="12"/>
             </Frame.Shadow>
-            <!-- Имя игрока -->
-            <HorizontalStackLayout>
-                <Image
-                    Source="user_icon.png" 
-                    Margin="0,0,10,0"
-                    WidthRequest="24"
-                    HeightRequest="24"
-                    Aspect="AspectFit"/>
+
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <!-- Имя игрока -->
+                <HorizontalStackLayout>
+                    <Image
+                        Source="user_icon.png" 
+                        Margin="0,0,10,0"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        Aspect="AspectFit"/>
+
+                    <Label
+                        Text="{Binding Username}"
+                        Margin="0,0,3,0"
+                        FontSize="16"
+                        TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
+                        FontFamily="OpenSansSemiBold"/>
+
+                    <Label
+                        Text="{Binding Rating, Converter={StaticResource RatingToBracketsConverter}}"
+                        FontSize="12"
+                        TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
+                        FontFamily="OpenSansRegular"
+                        />
+                </HorizontalStackLayout>
 
                 <Label
-                    Text="{Binding Username}"
-                    Margin="0,0,3,0"
-                    FontSize="16"
-                    TextColor="{AppThemeBinding Light=#2c3e50, Dark=White}"
-                    FontFamily="OpenSansSemiBold"/>
-
-                <Label
-                    Text="{Binding Rating, Converter={StaticResource RatingToBracketsConverter}}"
-                    FontSize="12"
-                    TextColor="{AppThemeBinding Light=#7f8c8d, Dark=#bdc3c7}"
-                    FontFamily="OpenSansRegular"
-                    />
-            </HorizontalStackLayout>
+                    Grid.Column="1"
+                    Text="{Binding PlayerTimeFormatted}"
+                    FontSize="20"
+                    FontFamily="OpenSansSemiBold"
+                    TextColor="DarkRed"
+                    VerticalOptions="Center"
+                    Padding="16,0,0,0"
+                    IsVisible="{Binding IsBotGame, Converter={StaticResource InverseBoolConverter}}"/>
+            </Grid>
         </Frame>
-
-        <Label Grid.Row="3"
-               Text="{Binding StatusMessage}"
-               HorizontalOptions="Center"
-               Margin="0,20"/>
 
         <Button Grid.Row="4"
                 Text="Сдаться"
                 HorizontalOptions="Center"
                 Margin="0,10"
-                WidthRequest="120"/>
+                WidthRequest="120"
+                Command="{Binding SurrenderCommand}"/>
     </Grid>
 </ContentPage>

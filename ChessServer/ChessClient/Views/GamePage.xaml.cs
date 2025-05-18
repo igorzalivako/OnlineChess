@@ -28,11 +28,11 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
         };
     }
 
-    protected override async void OnAppearing()
+    /*protected override async void OnAppearing()
     {
         base.OnAppearing();
         ((GameViewModel)BindingContext).Initialize();
-    }
+    }*/
 
     private BoardSquare? GetSquareAtPoint(Point absPos)
     {
@@ -89,6 +89,12 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
                     break;
             }
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        ViewModel.OnDisappearing();   
     }
 
     private GameViewModel ViewModel => BindingContext as GameViewModel;

@@ -15,5 +15,7 @@ namespace ChessLibrary.Models.DTO
         public string OpponentUsername { get; set; }
         public int OpponentRating { get; set; } 
         public List<ChessMove> AvailableMoves { get; set; }
+        public int WhiteLeftTime { get; set; }  
+        public int BlackLeftTime { get; set; }
     }
 }

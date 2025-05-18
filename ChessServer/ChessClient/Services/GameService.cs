@@ -1,4 +1,5 @@
-﻿using ChessLibrary.Models.DTO;
+﻿using ChessEngine;
+using ChessLibrary.Models.DTO;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
@@ -9,12 +10,13 @@ public class GameService : IAsyncDisposable
     public event Action<MatchFoundDto> MatchFound;
     public event Action<ChessMove[]> FoundAvailableMoves;
     public event Action<ChessMove> AcceptMove;
-    public event Action<ChessMove, List<ChessMove>> OpponentMove;
+    public event Action<string, List<ChessMove>> OpponentMove;
     public event Action<int> LeaveGame;
-    public event Action<string> EndGame;
+    public event Action<EndGameDto> EndGame;
     public event Action<string> ErrorOccurred;
     public event Action<string> QueueJoined;
-    public event Action<ChessMove, bool> MoveVerified;
+    public event Action<string, bool> MoveVerified;
+    public event Action<int, int> UpdateTimers;
 
     private HubConnection _hubConnection;
     private string _currentGameId;
@@ -35,13 +37,19 @@ public class GameService : IAsyncDisposable
         _hubConnection.On<MatchFoundDto>("MatchFound", HandleMatchFound);
         _hubConnection.On<ChessMove[]>("FoundAvailableMoves", HandleFoundAvailableMoves);
         _hubConnection.On<ChessMove>("AcceptMove", HandleAcceptMove);
-        _hubConnection.On<ChessMove, List<ChessMove>>("OpponentMove", HandleOpponentMove);
+        _hubConnection.On<string, List<ChessMove>>("OpponentMove", HandleOpponentMove);
         _hubConnection.On<int>("LeaveGame", HandleLeaveGame);
-        _hubConnection.On<string>("EndGame", HandleEndGame);
+        _hubConnection.On<EndGameDto>("EndGame", HandleEndGame);
         _hubConnection.On<string>("QueueJoined", HandleQueueJoined);
-        _hubConnection.On<ChessMove, bool>("MoveVerified", HandleMoveVerification);
+        _hubConnection.On<string, bool>("MoveVerified", HandleMoveVerification);
+        _hubConnection.On<int, int>("UpdateTimers", HandleUpdateTimers);
 
         _hubConnection.Closed += HandleConnectionClosed;
+    }
+
+    private void HandleUpdateTimers(int whiteLeftTime, int blackLeftTime)
+    {
+        UpdateTimers?.Invoke(whiteLeftTime, blackLeftTime);
     }
 
     private void HandleQueueJoined(string obj)
@@ -103,7 +111,7 @@ public class GameService : IAsyncDisposable
     {
         try
         {
-            await _hubConnection.InvokeAsync("LeaveGame");
+            await _hubConnection.InvokeAsync("LeaveGame", _currentGameId);
             _currentGameId = null;
         }
         catch (Exception ex)
@@ -133,9 +141,9 @@ public class GameService : IAsyncDisposable
         AcceptMove?.Invoke(move);
     }
 
-    private void HandleOpponentMove(ChessMove move, List<ChessMove> possibleMoves)
+    private void HandleOpponentMove(string newFenPosition, List<ChessMove> possibleMoves)
     {
-        OpponentMove?.Invoke(move, possibleMoves);
+        OpponentMove?.Invoke(newFenPosition, possibleMoves);
     }
 
     private void HandleLeaveGame(int userId)
@@ -144,10 +152,10 @@ public class GameService : IAsyncDisposable
         _currentGameId = null;
     }
 
-    private void HandleEndGame(string result)
+    private void HandleEndGame(EndGameDto endGameDto)
     {
-        EndGame?.Invoke(result);
-        _currentGameId = null;
+        EndGame?.Invoke(endGameDto);
+        //_currentGameId = null;
     }
 
     // Обработка разрыва соединения
@@ -157,9 +165,9 @@ public class GameService : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    private Task HandleMoveVerification(ChessMove move, bool isCorrect)
+    private Task HandleMoveVerification(string newFenPosition, bool isCorrect)
     {
-        MoveVerified.Invoke(move, isCorrect);
+        MoveVerified.Invoke(newFenPosition, isCorrect);
         return Task.CompletedTask;
     }
 
@@ -167,7 +175,20 @@ public class GameService : IAsyncDisposable
     {
         if (_hubConnection != null)
         {
+            await _hubConnection.StopAsync();
             await _hubConnection.DisposeAsync();
+        }
+    }
+
+    public async Task EndTime()
+    {
+        try
+        {
+            await _hubConnection.InvokeAsync("EndTime", _currentGameId);
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke($"EndTime failed: {ex.Message}");
         }
     }
 }

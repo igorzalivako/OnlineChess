@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<popup:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:popup="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+             x:Class="ChessClient.Views.PromotionPopup"
+             Size="300, 150"
+             CanBeDismissedByTappingOutsideOfPopup="False"
+             Color="Transparent">
+
+    <Frame Padding="0"
+           CornerRadius="20"
+           BorderColor="{AppThemeBinding Light=Black, Dark=White}"
+           BackgroundColor="Transparent">
+
+        <Grid RowDefinitions="*"
+              ColumnDefinitions="*,*,*,*"
+              Padding="10"
+              BackgroundColor="{AppThemeBinding Light=#F0D9B5, Dark=#B58863}">
+
+            <ImageButton x:Name="QueenButton" 
+                        Grid.Row="0" Grid.Column="0"
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        Clicked="Queen_Clicked"/>
+
+            <ImageButton x:Name="RookButton"
+                        Grid.Row="0" Grid.Column="1"
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        Clicked="Rook_Clicked"/>
+
+            <ImageButton x:Name="BishopButton"
+                        Grid.Row="0" Grid.Column="2"
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        Clicked="Bishop_Clicked"/>
+
+            <ImageButton x:Name="KnightButton"
+                        Grid.Row="0" Grid.Column="3"
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        Clicked="Knight_Clicked"/>
+
+        </Grid>
+    </Frame>
+</popup:Popup>

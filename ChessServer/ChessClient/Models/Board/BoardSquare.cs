@@ -11,9 +11,9 @@ namespace ChessClient.Models.Board
     public partial class BoardSquare : ObservableObject
     {
         [ObservableProperty]
-        public SquareColor _color;
+        private SquareColor _color;
         [ObservableProperty]
-        public ChessPiece _piece;
+        private ChessPiece _piece;
 
         [ObservableProperty]
 
