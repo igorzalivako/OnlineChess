@@ -40,7 +40,7 @@ public class MatchmakingService
             .Take(1)
             .ToListAsync();
 
-        if (candidates.Any())
+        if (candidates.Any() && Math.Abs(candidates.First().Rating - currentUser.Rating) < 100)
         {
             var opponent = candidates.First();
             await CreateGame(opponent.UserId, currentUser.UserId, currentUser.GameModeMinutes);
@@ -99,7 +99,7 @@ public class MatchmakingService
                 Position = game.GetFen(),
                 YourColor = "black",
                 OpponentUsername = firstPlayer.Username,
-                OpponentRating = secondPlayer.Rating,
+                OpponentRating = firstPlayer.Rating,
                 WhiteLeftTime= gameModeMinutes * 60,
                 BlackLeftTime= gameModeMinutes * 60,
             });

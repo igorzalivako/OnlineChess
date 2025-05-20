@@ -208,7 +208,7 @@
             // Проверка длинной и короткой рокировки
             if (side == PieceColor.White)
             {
-                if (rights.HasFlag(CastlingRights.WhiteLong) && CheckCastling(pieces, side, 0, 2, new[] { 1, 2, 3 }))
+                if (rights.HasFlag(CastlingRights.WhiteLong) && CheckCastling(pieces, side, 0, 2, new[] { 2, 3 }))
                     moves.PushBack(CreateCastlingMove(side, 4, 2, MoveFlag.WhiteLongCastling));
 
                 if (rights.HasFlag(CastlingRights.WhiteShort) && CheckCastling(pieces, side, 7, 6, new[] { 5, 6 }))
@@ -216,7 +216,7 @@
             }
             else
             {
-                if (rights.HasFlag(CastlingRights.BlackLong) && CheckCastling(pieces, side, 56, 58, new[] { 57, 58, 59 }))
+                if (rights.HasFlag(CastlingRights.BlackLong) && CheckCastling(pieces, side, 56, 58, new[] { 58, 59 }))
                     moves.PushBack(CreateCastlingMove(side, 60, 58, MoveFlag.BlackLongCastling));
 
                 if (rights.HasFlag(CastlingRights.BlackShort) && CheckCastling(pieces, side, 63, 62, new[] { 61, 62 }))
@@ -227,12 +227,19 @@
         private static bool CheckCastling(Pieces pieces, PieceColor side, int rookPos, int kingTarget, int[] checkSquares)
         {
             // Проверка наличия ладьи и свободных клеток
+            var kingPos = Bitboard.FindMostSignificantBit(pieces.PieceBitboards[(int)side, (int)PieceType.King].Value);
+            if (PsLegalMoves.IsSquareUnderAttack(pieces, (byte)kingPos, side))
+            {
+                return false;
+            }
             if ((pieces.PieceBitboards[(int)side, (int)PieceType.Rook].Value & (1UL << rookPos)) == 0)
                 return false;
 
             foreach (int sq in checkSquares)
                 if ((pieces.All.Value & (1UL << sq)) != 0 || PsLegalMoves.IsSquareUnderAttack(pieces, (byte)sq, side))
                     return false;
+
+
 
             return true;
         }

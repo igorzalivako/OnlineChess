@@ -57,7 +57,7 @@ public class LoadingPopup : Popup
     }
 
     // Метод для обновления статуса
-    public void UpdateStatus(string newMessage)
+    /*public void UpdateStatus(string newMessage)
     {
         if (this.Content is Border border &&
             border.Content is VerticalStackLayout layout &&
@@ -65,5 +65,5 @@ public class LoadingPopup : Popup
         {
             statusLabel.Text = newMessage;
         }
-    }
+    }*/
 }

@@ -18,6 +18,11 @@ namespace ChessEngine
             _openingBook = new OpeningBook(openingBookPath);
         }
 
+        public AI(string openingBookContent, bool isContent)
+        {
+            _openingBook = new OpeningBook(openingBookContent, isContent);
+        }
+
         public Move FindBestMove(Position position, PieceColor side, int minMs, int maxMs)
         {
             StaticEvaluator.Evaluate(position);

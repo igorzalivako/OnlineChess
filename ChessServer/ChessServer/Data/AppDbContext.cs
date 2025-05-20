@@ -16,7 +16,7 @@ public class AppDbContext : DbContext
     {
     }
 
-    // Настройка моделей (опционально)
+    // Настройка моделей
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity => {

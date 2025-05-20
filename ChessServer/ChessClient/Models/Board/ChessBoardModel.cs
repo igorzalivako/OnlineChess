@@ -16,6 +16,7 @@ namespace ChessClient.Models
     {
         public PieceColor PlayerColor { get; set; }
         public BoardSquare[,] _boardSquares;
+        public event Action UpdateBoard;
         // Объявление публичного свойства Squares
         public BoardSquare[,] BoardSquares
         {
@@ -107,7 +108,7 @@ namespace ChessClient.Models
             }
 
             return result;
-        }*/
+        }
 
         // получаем список возможных ходов для фигуры с сервера и присваиваем его _possibleMoves
         public static List<BoardMove> GetPossibleMoves(BoardPosition from)
@@ -115,7 +116,7 @@ namespace ChessClient.Models
             // PossibleMoves = ...
             throw new NotImplementedException();    
         }
-
+        */
         public void MakeMove(ChessMove move)
         {
             var movedPiece = BoardSquares[move.FromX, move.FromY].Piece;
@@ -161,6 +162,7 @@ namespace ChessClient.Models
                     x = 0;
                 }
             }
+            UpdateBoard?.Invoke();
         }
 
         private PieceType GetPieceFromFen(string c)
@@ -287,6 +289,7 @@ namespace ChessClient.Models
                     x = 0;
                 }
             }
+            UpdateBoard?.Invoke();
         }
     }
 }

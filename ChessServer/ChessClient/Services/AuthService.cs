@@ -18,7 +18,6 @@ namespace ChessClient.Services
     public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://localhost:5054"; 
 
         public AuthService(HttpClient httpClient)
         {
@@ -29,7 +28,7 @@ namespace ChessClient.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/api/users/login", loginDto);
+                var response = await _httpClient.PostAsJsonAsync($"{AppConfig.BaseUrl}/api/users/login", loginDto);
                 return await HandleLoginResponse(response);
             }
             catch (Exception ex)
@@ -53,7 +52,7 @@ namespace ChessClient.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/api/users/register", registerDto);
+                var response = await _httpClient.PostAsJsonAsync($"{AppConfig.BaseUrl}/api/users/register", registerDto);
                 return await HandleRegisterResponse(response);
             }
             catch (Exception ex)

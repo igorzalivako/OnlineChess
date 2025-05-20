@@ -21,17 +21,17 @@ public partial class PromotionPopup : Popup
     {
         if (_color == PieceColor.White)
         {
-            QueenButton.Source = "white_queen.png";
-            RookButton.Source = "white_rook.png";
-            BishopButton.Source = $"white_bishop.png";
-            KnightButton.Source = $"white_knight.png";
+            QueenButton.Source = "white_queen_promote.png";
+            RookButton.Source = "white_rook_promote.png";
+            BishopButton.Source = $"white_bishop_promote.png";
+            KnightButton.Source = $"white_knight_promote.png";
         }
         else
         {
-            QueenButton.Source = "black_queen.png";
-            RookButton.Source = "black_rook.png";
-            BishopButton.Source = $"black_bishop.png";
-            KnightButton.Source = $"black_knight.png";
+            QueenButton.Source = "black_queen_promote.png";
+            RookButton.Source = "black_rook_promote.png";
+            BishopButton.Source = $"black_bishop_promote.png";
+            KnightButton.Source = $"black_knight_promote.png";
         }
     }
 

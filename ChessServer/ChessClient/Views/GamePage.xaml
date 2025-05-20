@@ -5,7 +5,10 @@
              xmlns:vm="clr-namespace:ChessClient.ViewModels"
              xmlns:models="clr-namespace:ChessClient.Models.Board"
              xmlns:converters="clr-namespace:ChessClient.Utilities.Converters"
-             xmlns:behaviors="clr-namespace:ChessClient.Behaviors" 
+             xmlns:behaviors="clr-namespace:ChessClient.Behaviors"
+             xmlns:controls="clr-namespace:ChessClient.Controls"
+             xmlns:helpers="clr-namespace:ChessClient.Helpers"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:DataType="vm:GameViewModel"
              Title="Chess Game"
              x:Name="CurrentPage">
@@ -28,10 +31,11 @@
         <converters:DraggingOpacityConverter x:Key="DraggingOpacityConverter" />
         <converters:DraggingPositionToRectConverter x:Key="DraggingPositionToRectConverter" />
         <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <converters:NullToImageConverter x:Key="NullToImageConverter" />
     </ContentPage.Resources>
    
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto, Auto" 
+    <Grid RowDefinitions="Auto,*,Auto,Auto, Auto" 
           Padding="10"
           VerticalOptions="Fill"
           HorizontalOptions="Fill">
@@ -90,60 +94,24 @@
         <Frame Grid.Row="1"
                CornerRadius="4"
                BorderColor="{AppThemeBinding Light=Black, Dark=White}"
-               Padding="2">
-            <AbsoluteLayout x:Name="BoardAbsoluteLayout"
-                            VerticalOptions="CenterAndExpand"
-                            HorizontalOptions="CenterAndExpand"
-                            HeightRequest="360"
-                            WidthRequest="360">
-                <!-- Доска: CollectionView (или Grid) -->
-                <CollectionView x:Name="BoardCollectionView"
-                                ItemsSource="{Binding FlatBoard}"
-                                SelectionMode="None"
-                                AbsoluteLayout.LayoutBounds="0,0,1,1"
-                                AbsoluteLayout.LayoutFlags="All">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical"
-                                         Span="8"
-                                         HorizontalItemSpacing="0"
-                                         VerticalItemSpacing="0"/>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:BoardSquare">
-                            <Grid>
-                                <BoxView Color="{Binding Color, Converter={StaticResource SquareColorToViewColorConverter}}"
-                                         InputTransparent="True"/>
-
-                                <Ellipse BackgroundColor="Gray"
-                                         IsVisible="{Binding CanMoveTo}"
-                                         Margin="10">
-                                </Ellipse>
-
-                                <Image
-                                    Source="{Binding Piece.Image}"
-                                    IsVisible="{Binding Piece, Converter={StaticResource NullToBoolConverter}}"
-                                    Opacity="{Binding IsDragging, Converter={StaticResource DraggingOpacityConverter}}"
-                                    InputTransparent="False">
-                                    <Image.GestureRecognizers>
-                                        <PanGestureRecognizer
-                                            
-                                            PanUpdated="OnPiecePanUpdated"/>
-                                    </Image.GestureRecognizers>
-                                </Image>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-                <!-- Летающая фигура (поверх доски), если есть -->
-                <Image
-                    x:Name="DraggingPieceImage"
-                    IsVisible="{Binding DraggingSquare, Converter={StaticResource NullToBoolConverter}}"
-                    Source="{Binding DraggingSquare.Piece.Image}"
-                    WidthRequest="{Binding CellSize}"
-                    HeightRequest="{Binding CellSize}"
-                    AbsoluteLayout.LayoutBounds="{Binding DraggingRect}"
-                    />
-            </AbsoluteLayout>
+               Padding="2"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill">
+            <controls:AspectRatioContainer x:Name="AspectContainer" AspectRatio="1" Grid.Row="2" HorizontalOptions="Fill" VerticalOptions="Fill" Margin="16,8">
+                <Grid>
+                    <!-- CollectionView с доской (всегда полностью заполняет квадрат) -->
+                    <!-- Шахматная доска -->
+                    <GraphicsView
+                            x:Name="ChessBoardGraphicsView"
+                            Drawable="{Binding BoardDrawable}"
+                            StartInteraction="OnBoardTouchStart"
+                            DragInteraction="OnBoardTouchDrag"
+                            EndInteraction="OnBoardTouchEnd"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Fill" />
+                    
+                </Grid>
+            </controls:AspectRatioContainer>
         </Frame>
 
         <Frame 

@@ -4,7 +4,7 @@
     {
         private List<List<Move>> _moves = new List<List<Move>>();
 
-        public OpeningBook(string path)
+        /*public OpeningBook(string path)
         {
             if (!File.Exists(path))
                 throw new FileNotFoundException("Opening book not found", path);
@@ -22,6 +22,48 @@
                     var foundMove = legalMoves.FirstOrDefault((Move m) => m.From == from && m.To == to);
                     if (foundMove is null)
                         throw new InvalidDataException($"Некорректный ход {sanMove} в дебютной базе");
+                    gameMoves.Add(foundMove.Value);
+                    position.MakeMove(foundMove.Value);
+                }
+                _moves.Add(gameMoves);
+            }
+        }*/
+
+        // Существующий конструктор для работы с файлами по пути
+        public OpeningBook(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Opening book not found", path);
+
+            ProcessContent(File.ReadLines(path));
+        }
+
+        // Новый конструктор для работы с содержимым из строки
+        public OpeningBook(string content, bool isContent)
+        {
+            var lines = content.Split(
+                new[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.RemoveEmptyEntries
+            );
+            ProcessContent(lines);
+        }
+
+        private void ProcessContent(IEnumerable<string> lines)
+        {
+            foreach (var line in lines)
+            {
+                var gameMoves = new List<Move>();
+                var position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+
+                foreach (var sanMove in line.Split(' ').Where(m => !string.IsNullOrWhiteSpace(m)))
+                {
+                    var (from, to) = ParseSANMove(sanMove);
+                    var legalMoves = LegalMovesGenerator.Generate(position, position.ActiveColor, false);
+
+                    var foundMove = legalMoves.FirstOrDefault(m => m.From == from && m.To == to);
+                    if (foundMove is null)
+                        throw new InvalidDataException($"Некорректный ход {sanMove} в дебютной базе");
+
                     gameMoves.Add(foundMove.Value);
                     position.MakeMove(foundMove.Value);
                 }

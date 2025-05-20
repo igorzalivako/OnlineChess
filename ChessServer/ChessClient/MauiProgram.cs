@@ -4,6 +4,14 @@ using ChessClient.Services;
 using ChessClient.Views;
 using CommunityToolkit.Maui;
 using ChessClient.Models;
+using ChessClient.Helpers; // Подключи свой namespace!
+using Microsoft.Maui.Controls.Handlers.Items;
+using CommunityToolkit.Maui.Core;
+
+
+#if ANDROID
+using Android.Views;
+#endif
 
 namespace ChessClient
 {
@@ -14,7 +22,7 @@ namespace ChessClient
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseMauiCommunityToolkit() // Добавьте эту строку
+                .UseMauiCommunityToolkit() 
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -28,6 +36,33 @@ namespace ChessClient
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIcons");
                 });
+            builder
+                .UseMauiApp<App>()
+                .ConfigureMauiHandlers(handlers =>
+                {
+#if ANDROID
+                    handlers.AddHandler<CollectionView, CollectionViewHandler>();
+#endif
+                });
+            builder
+                .UseMauiApp<App>()
+                .UseMauiCommunityToolkitCore();
+#if ANDROID
+            // Добавляем маппинг для отключения скролла
+            CollectionViewHandler.Mapper.AppendToMapping("DisableScroll", (handler, view) =>
+            {
+                var isScrollDisabled = CollectionViewScrollBehavior.GetIsScrollDisabled(view);
+                if (isScrollDisabled && handler.PlatformView is AndroidX.RecyclerView.Widget.RecyclerView recyclerView)
+                {
+                    recyclerView.SetOnTouchListener(new NoScrollTouchListener());
+                }
+                else if (handler.PlatformView is AndroidX.RecyclerView.Widget.RecyclerView recyclerView2)
+                {
+                    recyclerView2.SetOnTouchListener(null); // вернуть дефолт
+                }
+            });
+#endif
+
             builder.Services.AddTransient<MainViewModel>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddSingleton<IAuthService, AuthService>();
@@ -46,4 +81,15 @@ namespace ChessClient
             return builder.Build();
         }
     }
+#if ANDROID
+    // Класс должен быть объявлен здесь, вне метода!
+    class NoScrollTouchListener : Java.Lang.Object, Android.Views.View.IOnTouchListener
+    {
+        public bool OnTouch(Android.Views.View v, MotionEvent e)
+        {
+            // true — запрещает любые тапы, включая скролл
+            return true;
+        }
+    }
+#endif
 }

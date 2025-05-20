@@ -64,7 +64,6 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -74,7 +73,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\black_bishop.png" />
+	  <MauiImage Remove="Resources\Images\black_king.png" />
+	  <MauiImage Remove="Resources\Images\black_knight.png" />
+	  <MauiImage Remove="Resources\Images\black_pawn.png" />
+	  <MauiImage Remove="Resources\Images\dotnet_bot.png" />
+	  <MauiImage Remove="Resources\Images\white_bishop.png" />
+	  <MauiImage Remove="Resources\Images\white_king.png" />
+	  <MauiImage Remove="Resources\Images\white_pawn.png" />
+	  <MauiImage Remove="Resources\Images\white_queen.png" />
+	  <MauiImage Remove="Resources\Images\white_rook.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
+		<PackageReference Include="CommunityToolkit.Maui.Core" Version="11.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.4" />
@@ -102,6 +115,30 @@
 	
 	<ItemGroup>
 		<MauiAsset Include="appsettings.json" />
+		<MauiAsset Include="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
 	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\Images\*.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Remove="Resources\Images\black_bishop_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\black_king_menu.png" />
+	  <EmbeddedResource Remove="Resources\Images\black_knight_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\black_queen_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\black_rook_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\white_bishop_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\white_king_menu.png" />
+	  <EmbeddedResource Remove="Resources\Images\white_knight_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\white_queen_promote.png" />
+	  <EmbeddedResource Remove="Resources\Images\white_rook_promote.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
+	</ItemGroup>
+
 	
 </Project>

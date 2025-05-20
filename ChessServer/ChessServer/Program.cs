@@ -93,7 +93,7 @@ app.MapGet("/api/health", () =>
     return Results.Ok(new { status = "OK", timestamp = DateTime.UtcNow });
 });
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRouting();
 

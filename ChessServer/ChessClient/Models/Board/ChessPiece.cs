@@ -10,7 +10,7 @@ namespace ChessClient.Models
     public enum PieceType { Pawn, Rook, Knight, King, Queen, Bishop };
     public class ChessPiece
     {
-        private static readonly Dictionary<PieceColor, Dictionary<PieceType, string>> piecesImages = new Dictionary<PieceColor, Dictionary<PieceType, string>>()
+        public static readonly Dictionary<PieceColor, Dictionary<PieceType, string>> piecesImages = new Dictionary<PieceColor, Dictionary<PieceType, string>>()
         {
             {
                 PieceColor.White, new Dictionary<PieceType, string>
