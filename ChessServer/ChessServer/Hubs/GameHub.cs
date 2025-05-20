@@ -18,6 +18,9 @@ public class GameHub : Hub
     private readonly MatchmakingService _matchmakingService;
     private const int ERROR = 3;
 
+    private const int WIN_RATING_ADDITION = 30;
+    private const int LOSE_RATING_SUBSTRACTION = 30;
+
     public GameHub(AppDbContext db, ChessGame engine, MatchmakingService matchmakingService)
     {
         _db = db;
@@ -53,10 +56,13 @@ public class GameHub : Hub
         if (game != null)
         {
             game.Status = GameStatus.Finished;
-            await _db.SaveChangesAsync();
 
-            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.UserLeave, false, "Поражение"));
-            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.UserLeave, true, "Победа"));
+            Tuple<int, int> newRatings = await CorrectRatings(game, Context.UserIdentifier, false);
+
+            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.UserLeave, false, $"Поражение\n-{LOSE_RATING_SUBSTRACTION}★", newRatings.Item2));
+            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.UserLeave, true, $"Победа\n+{WIN_RATING_ADDITION}★", newRatings.Item1));
+
+            await _db.SaveChangesAsync();
             //await Clients.Group(game.Id.ToString()).SendAsync("EndGame", new EndGameDto());
             //await Groups.RemoveFromGroupAsync(Context.ConnectionId, game.Id.ToString());
         }
@@ -84,11 +90,11 @@ public class GameHub : Hub
         }
         else
         {
-            var callerColor = game.PlayerWhiteId == callerId ? PieceColor.White : PieceColor.Black; 
+            var callerColor = game.PlayerWhiteId == callerId ? PieceColor.White : PieceColor.Black;
             Move engineMove = ConverterToEngineMove.ConvertToEngineMove(move, callerColor);
             bool isMoveCorrect = _engine.ApplyMove(engineMove, callerColor);
             await Clients.Caller.SendAsync("MoveVerified", _engine.GetFen(), isMoveCorrect);
-            if (isMoveCorrect) 
+            if (isMoveCorrect)
             {
                 // вычислить актуальное время для активного игрока
                 var now = DateTime.UtcNow;
@@ -146,8 +152,9 @@ public class GameHub : Hub
                 if (timeLeftWhite < ERROR)
                 {
                     game.Status = GameStatus.Finished;
+                    Tuple<int, int> newRatings = await CorrectRatings(game, Context.UserIdentifier, false);
+                    await SendEndGameMessage(gameId, newRatings);
                     await _db.SaveChangesAsync();
-                    await SendEndGameMessage(gameId);
                 }
             }
             else
@@ -156,28 +163,29 @@ public class GameHub : Hub
                 if (timeLeftBlack < ERROR)
                 {
                     game.Status = GameStatus.Finished;
-                    await _db.SaveChangesAsync();    
-                    await SendEndGameMessage(gameId);   
+                    Tuple<int, int> newRatings = await CorrectRatings(game, Context.UserIdentifier, false);
+                    await SendEndGameMessage(gameId, newRatings);
+                    await _db.SaveChangesAsync();
                 }
             }
             // --------------------------------
         }
     }
 
-    private async Task SendEndGameMessage(string gameId)
+    private async Task SendEndGameMessage(string gameId, Tuple<int, int> newRatings)
     {
-        await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.EndTime, false, "У вас закончилось время!\nВы проиграли"));
-        await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.EndTime, true, "У противника закончилось время!\nВы победили"));
+        await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.EndTime, false, $"У вас закончилось время!\nВы проиграли\n-{LOSE_RATING_SUBSTRACTION}★", newRatings.Item2));
+        await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.EndTime, true, $"У противника закончилось время!\nВы победили\n+{WIN_RATING_ADDITION}★", newRatings.Item1));
     }
 
     private async Task ProcessEndGame(string gameId, Game game)
     {
         if (_engine.IsCheckmate)
         {
-            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.Checkmate, false, ""));
-            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.Checkmate, true, ""));
+            Tuple<int, int> newRatings = await CorrectRatings(game, Context.UserIdentifier, true);
+            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.Checkmate, false, $"-{LOSE_RATING_SUBSTRACTION}★", newRatings.Item2));
+            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.Checkmate, true, $"+{WIN_RATING_ADDITION}★", newRatings.Item1));
             game.Status = GameStatus.Finished;
-            await _db.SaveChangesAsync();
         }
         else if (_engine.IsStalemate)
         {
@@ -186,15 +194,42 @@ public class GameHub : Hub
             {
                 message = "Объявлен пат";
             }
-            else 
+            else
             {
                 message = "Ничья по причине повторения позиций";
             }
-            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.Stalemate, false, message));
-            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.Stalemate, false, message));
+            await Clients.OthersInGroup(gameId).SendAsync("EndGame", new EndGameDto(EndGameType.Stalemate, false, message, -1));
+            await Clients.Caller.SendAsync("EndGame", new EndGameDto(EndGameType.Stalemate, false, message, -1));
             game.Status = GameStatus.Finished;
-            await _db.SaveChangesAsync();
         }
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task<Tuple<int, int>> CorrectRatings(Game game, string callerId, bool isCallerWinner)
+    {
+        User? winner;
+        User? loser;
+        if (isCallerWinner)
+        {
+            winner = await _db.Users.FindAsync(int.Parse(callerId));
+            loser = await _db.Users.FindAsync(game.PlayerWhiteId.ToString() == callerId ? game.PlayerBlackId : game.PlayerWhiteId);
+        }
+        else
+        {
+            winner = await _db.Users.FindAsync(game.PlayerWhiteId.ToString() == callerId ? game.PlayerBlackId : game.PlayerWhiteId);
+            loser = await _db.Users.FindAsync(int.Parse(callerId));
+        }
+
+        if (winner != null)
+        {
+            winner.Rating += WIN_RATING_ADDITION;
+        }
+        if (loser != null)
+        {
+            loser.Rating = loser.Rating - LOSE_RATING_SUBSTRACTION > 100 ? loser.Rating - LOSE_RATING_SUBSTRACTION : 100;
+        }
+        await _db.SaveChangesAsync();
+        return new Tuple<int, int>(winner.Rating, loser.Rating);
     }
 
     /*

@@ -138,12 +138,12 @@
                         Command="{Binding LoginCommand}"
                         HorizontalOptions="End"
                         IsVisible="{Binding IsLogged, Converter={StaticResource InverseBoolConverter}}">
-                        <Button.ImageSource>
+                        <!-- <Button.ImageSource>
                             <FontImageSource Glyph="&#xf2bd;"
                                         FontFamily="FASolid"
                                         Color="{AppThemeBinding Light=#2E2E2E, Dark=#FFFFFF}"
                                         Size="16"/>
-                        </Button.ImageSource>
+                        </Button.ImageSource> -->
                     </Button>
 
                     <!-- <VerticalStackLayout
@@ -223,6 +223,7 @@
 
                                 <VerticalStackLayout Spacing="0">
                                     <Grid 
+                                        HeightRequest="25"
                                         BackgroundColor="Transparent">
 
                                         <Grid.ColumnDefinitions>
@@ -381,7 +382,7 @@
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPlayerColorCommand}" CommandParameter="white"/>
                             </Frame.GestureRecognizers>
-                            <Image Source="white_king.png"
+                            <Image Source="white_king_menu.png"
                                    WidthRequest="48"
                                    HeightRequest="48"/>
                         </Frame>
@@ -394,7 +395,7 @@
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPlayerColorCommand}" CommandParameter="black"/>
                             </Frame.GestureRecognizers>
-                            <Image Source="black_king.png"
+                            <Image Source="black_king_menu.png"
                                    WidthRequest="48"
                                    HeightRequest="48"/>
                         </Frame>
@@ -435,7 +436,7 @@
                 </Grid>
             </Frame>
 
-            <!-- Кнопка "Из рук в руки" -->
+            <!-- Кнопка "Из рук в руки" 
             <Frame Style="{StaticResource GameModeButtonStyle}"
                    BackgroundColor="{Binding IsLocalGameSelected, 
                                    Converter={StaticResource BoolToColorConverter},
@@ -467,7 +468,7 @@
                             CommandParameter="Local"
                             BackgroundColor="Transparent"/>
                 </Grid>
-            </Frame>
+            </Frame>-->
         </StackLayout>
 
         <!-- Выпадающий список (появляется при IsTimePickerOpen = true) -->

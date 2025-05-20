@@ -10,6 +10,8 @@ using CommunityToolkit.Maui.Views;
 using System.Timers;
 using CommunityToolkit.Maui.Core;
 using ChessClient.Services;
+using ChessClient.Utilities;
+using System.Diagnostics;
 
 namespace ChessClient.ViewModels;
 
@@ -29,21 +31,21 @@ public partial class GameViewModel : ObservableObject
     private EndGamePopup _endGamePopup;
 
     private bool _isInitialized;
-    partial void OnUsernameChanged(string oldValue, string newValue) => TryInitialize();
-    partial void OnRatingChanged(string oldValue, string newValue) => TryInitialize();
-    partial void OnMinutesChanged(string oldValue, string newValue) => TryInitialize();
-    partial void OnGameModeNameChanged(string oldValue, string newValue) => TryInitialize();
-    partial void OnBotComplexityChanged(string oldValue, string newValue) => TryInitialize();
-    partial void OnBotColorChanged(string oldValue, string newValue) => TryInitialize();
+    async partial void OnUsernameChanged(string oldValue, string newValue) => await TryInitialize();
+    async partial void OnRatingChanged(string oldValue, string newValue) => await TryInitialize();
+    async partial void OnMinutesChanged(string oldValue, string newValue) => await TryInitialize();
+    async partial void OnGameModeNameChanged(string oldValue, string newValue) => await TryInitialize();
+    async partial void OnBotComplexityChanged(string oldValue, string newValue) => await TryInitialize();
+    async partial void OnBotColorChanged(string oldValue, string newValue) => await TryInitialize();
 
-    private void TryInitialize()
+    private async Task TryInitialize()
     {
         if (_isInitialized) return;
         if (!(Username is null) && !(Rating is null) && !(Minutes is null)
             && !(GameModeName is null) && !(BotComplexity is null) && !(BotColor is null))
         {
             _isInitialized = true;
-            Initialize();
+            await Initialize();
         }
     }
 
@@ -117,6 +119,8 @@ public partial class GameViewModel : ObservableObject
                 UpdateFlatBoard();
         };
         UpdateFlatBoard();
+
+        _chessBoard.UpdateBoard += UpdateFlatBoard;
     }
 
     private void UpdateFlatBoard()
@@ -136,7 +140,7 @@ public partial class GameViewModel : ObservableObject
         {
             for (int j = 0; j < 8; j++)
             {
-                for (int i = 7; i>= 0; i--)
+                for (int i = 0; i < 8; i++)
                 {
                     _newFlatBoard.Add(_chessBoard[i, j]);
                 }
@@ -144,6 +148,8 @@ public partial class GameViewModel : ObservableObject
         }
             
         FlatBoard = _newFlatBoard;
+        //OnPropertyChanged(nameof(FlatBoard));
+        RequestRedraw();
     }
 
     private void InitializeEventHandlers()
@@ -172,7 +178,7 @@ public partial class GameViewModel : ObservableObject
                                                  "Вы победили!", 
                                                  "", 
                                                  300, 
-                                                 200, 
+                                                 220, 
                                                  endGameDto.EndGameType, 
                                                  endGameDto.YouWon);
             }
@@ -182,7 +188,7 @@ public partial class GameViewModel : ObservableObject
                                                  "Вы проиграли",
                                                  "",
                                                  300,
-                                                 200,
+                                                 220,
                                                  endGameDto.EndGameType,
                                                  endGameDto.YouWon);
             }
@@ -193,7 +199,7 @@ public partial class GameViewModel : ObservableObject
                                  "Ничья",
                                  "",
                                  300,
-                                 200,
+                                 220,
                                  endGameDto.EndGameType,
                                  endGameDto.YouWon);
         }
@@ -203,7 +209,7 @@ public partial class GameViewModel : ObservableObject
                                  "Закончилось время",
                                  "",
                                  300,
-                                 200,
+                                 220,
                                  endGameDto.EndGameType,
                                  endGameDto.YouWon);
         }
@@ -213,13 +219,20 @@ public partial class GameViewModel : ObservableObject
                                              endGameDto.YouWon ? "Противник сдался" : "Вы сдались",
                                              "",
                                              300,
-                                             200,
+                                             220,
                                              endGameDto.EndGameType,
                                              endGameDto.YouWon);
         }
             _endGamePopup.Closed += OnEndGamePopupClosed;
         IsGameActive = false;
-        Thread.Sleep(1000);
+        if (endGameDto.NewRating != -1)
+        {
+            Rating = endGameDto.NewRating.ToString();
+        }
+        if (endGameDto.EndGameType != EndGameType.UserLeave)
+        {
+            Thread.Sleep(1000);
+        }
         MainThread.BeginInvokeOnMainThread(() =>
         {
             Shell.Current.CurrentPage.ShowPopup(_endGamePopup);
@@ -232,7 +245,14 @@ public partial class GameViewModel : ObservableObject
         if (IsBotGame)
         {
             UnsubscribeBotEvents();
-            await Shell.Current.GoToAsync($"///MainPage");
+            if (Username != "Игрок")
+            {
+                await Shell.Current.GoToAsync($"///MainPage?username={Username}&rating={Rating}");
+            } 
+            else
+            {
+                await Shell.Current.GoToAsync($"///MainPage");
+            }
         }
         else
         {
@@ -266,6 +286,9 @@ public partial class GameViewModel : ObservableObject
             _chessBoard.UpdatePositionFromFen(newFenPosition);
             ActivePlayerColor = InvertColor(ActivePlayerColor);
         }
+        DraggingSquare = null;
+        DraggingPosition = new Point(0, 0);
+        UpdateFlatBoard();
         _chessBoard.EndDrag();
     }
 
@@ -351,14 +374,19 @@ public partial class GameViewModel : ObservableObject
             SetTimers(matchFoundDto.WhiteLeftTime, matchFoundDto.BlackLeftTime);
             StartTimer();
 
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                if (_loadingPopup != null)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await _loadingPopup.CloseAsync(); // Асинхронное закрытие
-                }
-                _loadingPopup = null;
-            });
+                    if (_loadingPopup != null)
+                    {
+                        await _loadingPopup.CloseAsync(); // Асинхронное закрытие
+                    }
+                    _loadingPopup = null;
+                });
+            }
+            catch (Exception ex) { Debug.WriteLine("Ошибка закрытия попапа"); }
+            finally { _loadingPopup = null; }
         }
     }
 
@@ -410,7 +438,14 @@ private void OnGameStateUpdated(string fen)
         if (!IsGameActive) 
             return;
 
-        await _gameService.LeaveCurrentGame();
+        if (IsBotGame)
+        {
+            _botService.LeaveCurrentGame();
+        }
+        else
+        {
+            await _gameService.LeaveCurrentGame();
+        }
     }
 
     private void UpdateActivePieceAvailableMoves(BoardSquare square)
@@ -431,6 +466,7 @@ private void OnGameStateUpdated(string fen)
 
     public async Task Initialize()
     {
+        _chessBoard.LoadPositionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         Mode = GetCurrentGameMode();
         if (Mode == GameMode.Online)
         {
@@ -448,13 +484,14 @@ private void OnGameStateUpdated(string fen)
         }
     }
 
-    private void InitializeBotGame()
+    private async Task InitializeBotGame()
     {
         IsBotGame = true;
         PieceColor botColor;
         int botRating;
         (botColor, botRating) = GetBotSettings();
         _botService = new BotService(botColor, botRating);
+        await _botService.CreateAsync();
         InitializeBotEventHandlers();
         _botService.CreateGame(Username, Rating);       
     }
@@ -496,10 +533,11 @@ private void OnGameStateUpdated(string fen)
     [ObservableProperty]
     private Point _draggingPosition; // Пиксельная позиция для смещения
 
-    public void StartDrag(BoardSquare square)
+    public void StartDrag(BoardSquare square, Point pos)
     {
         if (square.Piece != null && square.Piece.Color == PlayerColor)
         {
+            DraggingPosition = pos;
             DraggingSquare = square;
             square.IsDragging = true;
             UpdateActivePieceAvailableMoves(square);
@@ -527,10 +565,10 @@ private void OnGameStateUpdated(string fen)
             else
             {
                 fromSquare.IsDragging = false;
+                DraggingSquare = null;
+                DraggingPosition = new Point(0, 0);
             }
         }
-        DraggingSquare = null;
-        DraggingPosition = new Point(0, 0);
         _chessBoard.ChearHighlighting();
     }
 
@@ -644,12 +682,24 @@ private void OnGameStateUpdated(string fen)
         return color == PieceColor.White ? PieceColor.Black : PieceColor.White;
     }
 
-    public void OnDisappearing()
+    public async void OnDisappearing()
     {
-        //LeaveGame();
         if (!IsBotGame)
         {
             UnsubscribeEvents();
         }
+    }
+
+    [ObservableProperty]
+    private ChessBoardDrawable _boardDrawable = new();
+
+    public void RequestRedraw()
+    {
+        // Вызываем через MainThread для безопасности
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            BoardDrawable.ViewModel = this;
+            OnPropertyChanged(nameof(BoardDrawable));
+        });
     }
 }

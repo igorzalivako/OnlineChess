@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 namespace ChessLibrary.Models.DTO
 {
     public enum EndGameType { Checkmate, Stalemate, EndTime, UserLeave }
-    public record EndGameDto(EndGameType EndGameType, bool YouWon, string Message);
+    public record EndGameDto(EndGameType EndGameType, bool YouWon, string Message, int NewRating);
 }

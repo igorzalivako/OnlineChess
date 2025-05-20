@@ -4,6 +4,8 @@ using ChessClient.Models.Board;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using ChessClient.Controls;
+using CommunityToolkit.Maui.Core;
 
 namespace ChessClient.Views;
 
@@ -22,9 +24,18 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
         InitializeComponent();
         BindingContext = gameViewModel;
 
-        BoardAbsoluteLayout.SizeChanged += (s, e) =>
+        AspectContainer.SizeChanged += (s, e) =>
         {
-            ViewModel.CellSize = BoardAbsoluteLayout.Width / BoardSize;
+            double size = Math.Min(AspectContainer.Width, AspectContainer.Height) / 8.0;
+            gameViewModel.CellSize = size;
+        };
+
+        gameViewModel.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(gameViewModel.FlatBoard))
+            {
+                ChessBoardGraphicsView.Invalidate();
+            }
         };
     }
 
@@ -33,7 +44,7 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
         base.OnAppearing();
         ((GameViewModel)BindingContext).Initialize();
     }*/
-
+    /*
     private BoardSquare? GetSquareAtPoint(Point absPos)
     {
         // Определяем индекс клетки по координатам пальца
@@ -46,7 +57,16 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
             return ViewModel.FlatBoard[index];
         return null;
     }
-
+    */
+    public BoardSquare? GetSquareAtPoint(Point pos)
+    {
+        int x = (int)(pos.X / ViewModel.CellSize);
+        int y = (int)(pos.Y / ViewModel.CellSize);
+        if (x < 0 || x > 7 || y < 0 || y > 7)
+            return null;
+        // В твоем FlatBoard порядок зависит от цвета игрока!
+        return ViewModel.FlatBoard[y * 8 + x];
+    }
     private Point GetAbsolutePositionForCell(BoardSquare square)
     {
         var index = ViewModel.FlatBoard.IndexOf(square);
@@ -56,11 +76,48 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
         return new Point(col * ViewModel.CellSize, row * ViewModel.CellSize);
     }
 
-    private void OnPiecePanUpdated(object sender, PanUpdatedEventArgs e)
+    void OnBoardTouchStart(object? sender, TouchEventArgs e)
+    {
+        if (!(BindingContext is GameViewModel vm) || !vm.IsBoardActive)
+            return;
+        var touch = e.Touches.FirstOrDefault();
+        if (touch == null) return;
+        var pos = new Point(touch.X, touch.Y);
+
+        var sq = GetSquareAtPoint(pos);
+        vm.StartDrag(sq, pos);
+        ChessBoardGraphicsView.Invalidate();
+    }
+
+    void OnBoardTouchDrag(object? sender, TouchEventArgs e)
+    {
+        if (!(BindingContext is GameViewModel vm) || !vm.IsBoardActive)
+            return;
+        var touch = e.Touches.FirstOrDefault();
+        if (touch == null) return;
+        var pos = new Point(touch.X, touch.Y);
+
+        vm.UpdateDrag(pos);
+        ChessBoardGraphicsView.Invalidate();
+    }
+
+    void OnBoardTouchEnd(object? sender, TouchEventArgs e)
+    {
+        if (!(BindingContext is GameViewModel vm) || !vm.IsBoardActive)
+            return;
+        var touch = e.Touches.FirstOrDefault();
+        if (touch == null) return;
+        var pos = new Point(touch.X, touch.Y);
+
+        vm.EndDrag(pos, GetSquareAtPoint);
+        ChessBoardGraphicsView.Invalidate();
+    }
+
+    /*private void OnPiecePanUpdated(object sender, PanUpdatedEventArgs e)
     {
         if (sender is Image image && image.BindingContext is BoardSquare square && ViewModel.IsBoardActive)
         {
-            var absLayout = BoardAbsoluteLayout;
+            //var absLayout = BoardAbsoluteLayout;
 
             switch (e.StatusType)
             {
@@ -89,7 +146,7 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
                     break;
             }
         }
-    }
+    }*/
 
     protected override void OnDisappearing()
     {
@@ -98,5 +155,19 @@ public partial class GamePage : ContentPage, INotifyPropertyChanged
     }
 
     private GameViewModel ViewModel => BindingContext as GameViewModel;
+
+    private void Button_Clicked(object sender, EventArgs e)
+    {
+        Debug.WriteLine("Нажата кнопка");
+    }
+
+    private void OnChessBoardSizeChanged(object sender, EventArgs e)
+    {
+        ViewModel.CellSize = Math.Min(
+            ChessBoardGraphicsView.Width,
+            ChessBoardGraphicsView.Height
+        ) / 8;
+        ChessBoardGraphicsView.Invalidate(); // Форсируем перерисовку
+    }
 
 }

@@ -9,4 +9,10 @@ public partial class AuthPage : ContentPage
         InitializeComponent();
 		BindingContext = authViewModel;
 	}
+
+    protected override bool OnBackButtonPressed()
+    {
+        Shell.Current.GoToAsync("///MainPage");
+        return true; 
+    }
 }

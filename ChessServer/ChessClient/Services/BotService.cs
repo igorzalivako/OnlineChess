@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ChessLibrary.Converters;
 using ChessEngine;
 using ChessLibrary.Models.DTO;
+using ChessClient.Utilities.ResourcesLoaders;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Text.Json;
 
@@ -34,9 +35,14 @@ namespace ChessClient.Services
         {
             _chessGame = new ChessGame();
             _chessGame.Position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-            _chessAi = new AI("OpeningBase.txt");
             _botColor = botColor;
             _botRating = botRating;     
+        }
+
+        public async Task CreateAsync()
+        {
+            string openingBookContent = await OpeningBookLoader.LoadAsync("OpeningBase.txt");
+            _chessAi = new AI(openingBookContent, true);
         }
 
         /*
@@ -83,6 +89,13 @@ namespace ChessClient.Services
                 OpponentRating = _botRating,
                 AvailableMoves = ConverterToMoveList.ConvertToChessMoveList(availableMoves),
             });
+            if (_botColor == PieceColor.White)
+            {
+                Move bestMove = _chessAi.FindBestMove(_chessGame.Position, _chessGame.Position.ActiveColor, _botRating - 500, _botRating);
+                _chessGame.ApplyMove(bestMove, _botColor);
+
+                OpponentMove?.Invoke(_chessGame.GetFen(), ConverterToMoveList.ConvertToChessMoveList(_chessGame.GetValidMoves(_chessGame.Position.ActiveColor)));
+            }
         }
 
         public async Task ApplyMove(ChessMove move)
@@ -124,11 +137,11 @@ namespace ChessClient.Services
             {
                 if (isPlayerMove)
                 {
-                    EndGame?.Invoke(new EndGameDto(EndGameType.Checkmate, false, "Бот поставил Вам мат. Надо тренироваться"));
+                    EndGame?.Invoke(new EndGameDto(EndGameType.Checkmate, false, "Бот поставил Вам мат. Надо тренироваться", -1));
                 }
                 else
                 {
-                    EndGame?.Invoke(new EndGameDto(EndGameType.Checkmate, true, "Объявлен мат боту"));
+                    EndGame?.Invoke(new EndGameDto(EndGameType.Checkmate, true, "Объявлен мат боту", -1));
                 }
             }
             else if (_chessGame.IsStalemate)
@@ -142,13 +155,19 @@ namespace ChessClient.Services
                 {
                     message = "Ничья по причине повторения позиций";
                 }
-                EndGame?.Invoke(new EndGameDto(EndGameType.Stalemate, false, message));
+                EndGame?.Invoke(new EndGameDto(EndGameType.Stalemate, false, message, -1));
             }
             else
             {
                 isEndGame = false;
             }
             return isEndGame;
+        }
+
+        public void LeaveCurrentGame()
+        {
+            string message = "Поражение";
+            EndGame?.Invoke(new EndGameDto(EndGameType.UserLeave, false, message, -1));
         }
     }
 
