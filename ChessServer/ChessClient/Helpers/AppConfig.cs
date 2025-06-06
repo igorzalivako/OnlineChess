@@ -11,8 +11,8 @@ public static class AppConfig
             .Build();
 
         BaseUrl = config["ApiSettings:BaseUrl"];*/
-        //BaseUrl = "http://192.168.100.4:5054";
-        BaseUrl = "http://192.168.172.53:5054";
+        //BaseUrl = "http://192.168.100.6:5054";
+        BaseUrl = "http://192.168.174.53:5054";
         
     }
 }

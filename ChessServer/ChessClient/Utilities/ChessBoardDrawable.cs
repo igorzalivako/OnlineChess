@@ -34,7 +34,7 @@ namespace ChessClient.Utilities
                     // Подсветка хода
                     if (sq.CanMoveTo)
                     {
-                        canvas.FillColor = Colors.Gray.WithAlpha(0.4f);
+                        canvas.FillColor = Colors.Gray.WithAlpha(0.8f);
                         // Кружок в центре
                         float margin = (float)(cellSize * 0.28);
                         canvas.FillEllipse(
@@ -85,7 +85,7 @@ namespace ChessClient.Utilities
             {
                 return;
             }*/
-            // Получаем изображение (пример через сервис, можно иначе)
+            
             var img = GetPieceImage(piece);
             if (!(img is null))
             {

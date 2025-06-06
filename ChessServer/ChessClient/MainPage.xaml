@@ -101,12 +101,12 @@
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="0,0,20,20"/>
             </Border.StrokeShape>
-            <Border.Shadow>
+            <!--<Border.Shadow>
                 <Shadow Brush="#40000000"
-                        Offset="0,10"
+                        Offset="0,2"
                         Radius="20"
                         Opacity="0.2"/>
-            </Border.Shadow>
+            </Border.Shadow>-->
 
             <Grid BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1E1E1E}"
                   Padding="24,16">
@@ -121,7 +121,7 @@
                            HeightRequest="32"
                            WidthRequest="32"/>
 
-                    <Label Text="CHESSMASTER"
+                    <Label Text="Online Chess"
                           FontFamily="RobotoBold"
                           FontSize="20"
                           TextColor="{AppThemeBinding Light=#2E2E2E, Dark=#FFFFFF}"
