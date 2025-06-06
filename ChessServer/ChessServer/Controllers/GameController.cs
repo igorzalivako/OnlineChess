@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-[ApiController]
+/*[ApiController]
 [Route("api/games")]
 [Authorize]
 public class GamesController : ControllerBase
@@ -86,3 +86,4 @@ public class GamesController : ControllerBase
         return inQueue || inGame;
     }
 }
+*/

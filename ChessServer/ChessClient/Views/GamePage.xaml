@@ -50,11 +50,11 @@
             VerticalOptions="Start"
             HorizontalOptions="Fill">
 
-            <Frame.Shadow>
+            <!-- <Frame.Shadow>
                 <Shadow Brush="{AppThemeBinding Light=#30000000, Dark=#40FFFFFF}"
                         Offset="3,3"
                         Radius="12"/>
-            </Frame.Shadow>
+            </Frame.Shadow>-->
             <!-- Имя игрока -->
             <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                 <HorizontalStackLayout>
@@ -123,11 +123,11 @@
             VerticalOptions="Start"
             HorizontalOptions="Fill">
 
-            <Frame.Shadow>
+            <!--<Frame.Shadow>
                 <Shadow Brush="{AppThemeBinding Light=#30000000, Dark=#40FFFFFF}"
                         Offset="3,3"
                         Radius="12"/>
-            </Frame.Shadow>
+            </Frame.Shadow>-->
 
             <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                 <!-- Имя игрока -->
