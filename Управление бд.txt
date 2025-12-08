@@ -1,1 +1,0 @@
-CREATE USER 'chess_admin'@'localhost' IDENTIFIED BY 'jk3670x5ru3et9789f789rq8798'
